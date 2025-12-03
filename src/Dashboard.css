@@ -1,0 +1,61 @@
+/* Background */
+.dash-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8879db, #d3b4e7, #ff4fc7);
+  font-family: "Poppins", sans-serif;
+}
+
+
+.dash-card {
+  width: 420px;
+  background: #ffffff;         
+  padding: 40px;
+  border-radius: 22px;
+  color: #333;                   
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  animation: cardFade 0.9s ease;
+}
+
+@keyframes cardFade {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+/* --------------------------------------------------- */
+
+.welcome-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-top: 10px;
+  color: #4b2cff;                 
+}
+
+.welcome-desc {
+  font-size: 15px;
+  opacity: 0.8;
+  margin-bottom: 25px;
+}
+
+/* Logout Button */
+.logout-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff3d9b, #b300ff);
+  color: white;
+  cursor: pointer;
+  transition: 0.25s;
+  font-size: 15px;
+}
+
+.logout-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #ff1e85, #8a00d6);
+}
+

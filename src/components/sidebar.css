@@ -1,0 +1,114 @@
+
+.sidebar {
+  width: 250px;
+  background: #1e1e2f;
+  color: white;
+  height: 100vh;
+  padding-top: 10px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  border-right: 3px solid #333;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   
+  padding: 0 10px;
+  margin-bottom: 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 0;     
+  padding-left: 0;     
+}
+
+.logo-img {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  object-fit: contain;
+  transition: all 0.3s ease;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+
+.toggle-floating {
+  position: absolute;
+  top: 15px;
+  right: -18px; 
+  background: #111;
+  padding: 10px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10000;
+  transition: 0.3s ease;
+}
+
+.toggle-floating:hover {
+  background: #333;
+}
+
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.nav-list li {
+  margin: 12px 0;
+}
+
+.nav-list a,
+.logout-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  color: white;
+  text-decoration: none;
+  font-size: 17px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.nav-list a:hover,
+.logout-link:hover {
+  background: #333;
+}
+
+.icon {
+  font-size: 20px;
+}
+
+
+.sidebar.collapsed span {
+  display: none;
+}
+
+.layout {
+  display: flex;
+  height: 100vh;  
+  width: 100%;
+}

@@ -1,0 +1,77 @@
+/* Background */
+.auth-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff9ccf, #b580ff);
+  font-family: Arial, sans-serif;
+}
+
+/* Card */
+.auth-card {
+  width: 350px;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0px 5px 25px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: fadeIn 0.8s ease;
+}
+
+.auth-card h2 {
+  margin-bottom: 20px;
+  color: #a100cc;
+}
+
+/* Inputs */
+.auth-input {
+  width: 90%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 2px solid #d49dff;
+  outline: none;
+  transition: 0.3s;
+}
+
+.auth-input:focus {
+  border-color: #a100cc;
+}
+
+/* Button */
+.auth-btn {
+  width: 95%;
+  padding: 12px;
+  background: #a100cc;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+.auth-btn:hover {
+  background: #7d00a3;
+}
+
+/* Link */
+.auth-link {
+  margin-top: 15px;
+  display: block;
+  color: #7d00a3;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
