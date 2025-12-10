@@ -1,0 +1,27 @@
+/* Sidebar.css */
+.sidebar {
+  flex-shrink: 0;              /* Prevent sidebar from shrinking */
+  white-space: nowrap;         /* Keep labels from wrapping */
+  transition: width 0.25s ease; /* Smooth expand/collapse */
+  overflow-x: hidden;          /* Hide text when collapsed */
+}
+
+.sidebar .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+.sidebar .navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.sidebar .navItem:hover {
+  background: rgba(0,0,0,0.06);
+}
