@@ -26,7 +26,13 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
-  const login = ({ email, password }) => {
+  const login = ({ email, password, role }) => {
+    // ✅ Guest login bypass
+    if (role === 'guest') {
+      setUser({ email: 'Guest', role: 'guest' });
+      return true;
+    }
+
     const found = users.find(u => u.email === email);
     if (!found) throw new Error('User not found');
     const plain = decryptPassword(found.password);
@@ -37,7 +43,17 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => setUser(null);
 
-  const value = useMemo(() => ({ user, register, login, logout }), [user, users]);
+  // ✅ Expose guestLogin separately for convenience
+  const guestLogin = () => {
+    setUser({ email: 'Guest', role: 'guest' });
+    return true;
+  };
+
+  const value = useMemo(
+    () => ({ user, register, login, logout, guestLogin }),
+    [user, users]
+  );
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 

@@ -1,18 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
-import { ThemeModeProvider } from './context/ThemeContext.jsx';   // ✅ added
+import { ThemeModeProvider } from './context/ThemeContext.jsx';  
 import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Orders from './pages/Orders.jsx';
 import ProtectedRoute from './routes/ProtectedRoutes.jsx';
+import Checkout from './pages/CheckOut.jsx';  
 
 const App = () => {
   return (
     <AuthProvider>
       <CartProvider>
-        <ThemeModeProvider>   {/* ✅ wrap with theme provider */}
+        <ThemeModeProvider>  
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
@@ -34,6 +35,14 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />  
             </Routes>
           </BrowserRouter>
         </ThemeModeProvider>

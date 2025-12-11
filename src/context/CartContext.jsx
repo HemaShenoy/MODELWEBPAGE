@@ -7,19 +7,28 @@ const CART_KEY = 'app_cart';
 
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
-  const [items, setItems] = useState(storage.get(CART_KEY, []));
 
-  useEffect(() => storage.set(CART_KEY, items), [items]);
+
+  const userCartKey = user ? `cart_${user.email}` : 'cart_guest';
+
+
+  const [items, setItems] = useState(storage.get(userCartKey, []));
+
+  useEffect(() => storage.set(userCartKey, items), [items, userCartKey]);
 
   const key = (productId, weight) => `${productId}_${weight}`;
 
   const addItem = ({ productId, name, weight, unitPrice }) => {
-    if (!user) return { error: 'AUTH_REQUIRED' };
+    if (!user || user.role === 'guest') return { error: 'AUTH_REQUIRED' };
     const k = key(productId, weight);
     setItems(prev => {
       const existing = prev.find(i => i.key === k);
       if (existing) {
-        return prev.map(i => i.key === k ? { ...i, quantity: i.quantity + 1, totalPrice: (i.quantity + 1) * i.unitPrice } : i);
+        return prev.map(i =>
+          i.key === k
+            ? { ...i, quantity: i.quantity + 1, totalPrice: (i.quantity + 1) * i.unitPrice }
+            : i
+        );
       }
       const newItem = { key: k, productId, name, weight, quantity: 1, unitPrice, totalPrice: unitPrice };
       return [...prev, newItem];
@@ -45,14 +54,21 @@ export const CartProvider = ({ children }) => {
       const existing = prev.find(i => i.key === oldKey);
       if (!existing) return prev;
       const newKey = key(productId, newWeight);
-      const updated = { ...existing, weight: newWeight, unitPrice: newUnitPrice, totalPrice: existing.quantity * newUnitPrice, key: newKey };
+      const updated = {
+        ...existing,
+        weight: newWeight,
+        unitPrice: newUnitPrice,
+        totalPrice: existing.quantity * newUnitPrice,
+        key: newKey
+      };
       const filtered = prev.filter(i => i.key !== oldKey);
-      // Merge if an item with newKey already exists
+      
       const same = filtered.find(i => i.key === newKey);
       if (same) {
-        return filtered.map(i => i.key === newKey
-          ? { ...i, quantity: i.quantity + updated.quantity, totalPrice: (i.quantity + updated.quantity) * updated.unitPrice }
-          : i
+        return filtered.map(i =>
+          i.key === newKey
+            ? { ...i, quantity: i.quantity + updated.quantity, totalPrice: (i.quantity + updated.quantity) * updated.unitPrice }
+            : i
         );
       }
       return [...filtered, updated];

@@ -9,8 +9,6 @@ import HomeIcon from '@mui/icons-material/Home';
 import InfoIcon from '@mui/icons-material/Info';
 import { useNavigate } from 'react-router-dom';
 
-const ORDERS_KEY = 'app_orders';
-
 const Orders = () => {
   const { user } = useAuth();
   const [sidebarWidth, setSidebarWidth] = useState(240);
@@ -24,13 +22,15 @@ const Orders = () => {
     { key: 'orders', label: 'My Orders', icon: <ShoppingCartIcon />, onClick: () => navigate('/orders') }
   ];
 
+
+  const ORDERS_KEY = user ? `orders_${user.email}` : 'orders_guest';
   const orders = storage.get(ORDERS_KEY, []);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       {/* Sidebar */}
       <Sidebar
-        onCategorySelect={(cat) => navigate('/dashboard')} // ✅ redirect to Dashboard when category clicked
+        onCategorySelect={() => navigate('/dashboard')}
         publicItems={publicItems}
         authItems={authItems}
         onWidthChange={setSidebarWidth}
@@ -55,24 +55,51 @@ const Orders = () => {
 
         {/* Orders list */}
         <Box sx={{ flex: 1, p: 2 }}>
-          {!orders.length ? (
+          {!Array.isArray(orders) || orders.length === 0 ? (
             <Typography>No orders yet.</Typography>
           ) : (
             orders.map((order, idx) => (
               <Paper key={idx} sx={{ p: 2, mb: 2 }}>
                 <Typography variant="subtitle1">Order {idx + 1}</Typography>
-                <Typography variant="caption">Date: {new Date(order.date).toLocaleString()}</Typography>
+                <Typography variant="caption">
+                  Date: {new Date(order.date).toLocaleString()}
+                </Typography>
+
+                
+                {order.orderId && (
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Payment ID: {order.orderId}
+                  </Typography>
+                )}
+                {order.paymentStatus && (
+                  <Typography
+                    variant="body2"
+                    sx={{ mt: 1, color: order.paymentStatus === 'success' ? 'green' : 'red' }}
+                  >
+                    Status: {order.paymentStatus}
+                  </Typography>
+                )}
+                {order.userDetails && (
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Billing: {order.userDetails.name}, {order.userDetails.email}, {order.userDetails.phone}, {order.userDetails.address}
+                  </Typography>
+                )}
+
                 <List dense>
-                  {order.items.map(item => (
-                    <ListItem key={item.key}>
-                      <ListItemText
-                        primary={`${item.name} — ${item.weight}g`}
-                        secondary={`Qty: ${item.quantity} | Subtotal: ₹${item.totalPrice}`}
-                      />
-                    </ListItem>
-                  ))}
+                  {Array.isArray(order.items) &&
+                    order.items.map(item => (
+                      <ListItem key={item.key}>
+                        <ListItemText
+                          primary={`${item.name} — ${item.weight}g`}
+                          secondary={`Qty: ${item.quantity} | Subtotal: ₹${item.totalPrice}`}
+                        />
+                      </ListItem>
+                    ))}
                 </List>
-                <Typography variant="subtitle2">Order Total: ₹{order.totalPrice}</Typography>
+                <Typography variant="subtitle2">
+                   Order Total: ₹{order.totalAmount || order.totalPrice}
+                </Typography>
+
               </Paper>
             ))
           )}

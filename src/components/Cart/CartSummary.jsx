@@ -2,12 +2,15 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../context/CartContext.jsx';
 import { Paper, Typography, List, ListItem, ListItemText, Box, Button } from '@mui/material';
 import { storage } from '../../services/storage.js';
-
-const ORDERS_KEY = 'app_orders';
+import { useNavigate } from 'react-router-dom';   
 
 const CartSummary = () => {
   const { user } = useAuth();
   const { items, totalCount, totalPrice, clearCart } = useCart();
+  const navigate = useNavigate();   
+
+ 
+  const ORDERS_KEY = user ? `orders_${user.email}` : 'orders_guest';
 
   const handleCheckout = () => {
     if (!items.length) return;
@@ -41,7 +44,15 @@ const CartSummary = () => {
       </Box>
       <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
         <Button variant="outlined" onClick={clearCart} disabled={!items.length}>Clear Cart</Button>
-        <Button variant="contained" onClick={handleCheckout} disabled={!items.length}>Checkout</Button>
+        
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => navigate('/checkout')}
+          disabled={!items.length}
+        >
+          Go to Checkout
+        </Button>
       </Box>
     </Paper>
   );
