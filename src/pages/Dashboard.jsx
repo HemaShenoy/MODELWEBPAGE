@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Box, Typography, AppBar, Toolbar, Badge, IconButton } from '@mui/material';
+import {
+  Box,
+  Typography,
+  AppBar,
+  Toolbar,
+  Badge,
+  IconButton
+} from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import HomeIcon from '@mui/icons-material/Home';
 import InfoIcon from '@mui/icons-material/Info';
@@ -21,7 +28,7 @@ const Dashboard = () => {
   const [sidebarWidth, setSidebarWidth] = useState(240); // default expanded
   const { user } = useAuth();
   const { totalCount } = useCart();
-  const { mode, toggleMode } = useThemeMode();   // ✅ theme hook
+  const { mode, toggleMode } = useThemeMode();
   const navigate = useNavigate();
 
   const publicItems = [
@@ -32,6 +39,14 @@ const Dashboard = () => {
   const authItems = [
     { key: 'orders', label: 'My Orders', icon: <ShoppingCartIcon />, onClick: () => navigate('/orders') }
   ];
+
+  // ✅ Scroll to CartSummary instead of navigating away
+  const scrollToCartSummary = () => {
+    const el = document.getElementById('cart-summary');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -58,12 +73,12 @@ const Dashboard = () => {
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="h6">Welcome {user ? user.email : 'Guest'}</Typography>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              {/* ✅ Dark/Light mode toggle */}
+              {/* Dark/Light mode toggle */}
               <IconButton onClick={toggleMode}>
                 {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
               </IconButton>
-              {/* Cart icon */}
-              <IconButton onClick={() => navigate('/orders')}>
+              {/* Cart icon scrolls to CartSummary */}
+              <IconButton onClick={scrollToCartSummary}>
                 <Badge badgeContent={totalCount} color="primary">
                   <ShoppingCartIcon />
                 </Badge>
@@ -80,7 +95,11 @@ const Dashboard = () => {
             </Typography>
           )}
           <ProductList activeCategory={activeCategory} />
-          <CartSummary />
+
+          {/* ✅ CartSummary with id for scroll target */}
+          <Box id="cart-summary">
+            <CartSummary />
+          </Box>
         </Box>
 
         {/* Footer */}

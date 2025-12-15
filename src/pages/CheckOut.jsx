@@ -42,19 +42,18 @@ const Checkout = () => {
     }
 
     const options = {
-      key: 'rzp_test_RqB16rwHoMJwx7', // replace with your Razorpay Key ID
-      amount: totalPrice * 100, // Razorpay works in paise
+      key: 'rzp_test_RqB16rwHoMJwx7',
+      amount: totalPrice * 100,
       currency: 'INR',
       name: 'SweetShop Checkout',
       description: 'Order Payment',
       handler: function (response) {
-       
         const order = {
           orderId: response.razorpay_payment_id,
-          userDetails: billing,
-          cartItems: items,
-          totalAmount: totalPrice,
-          paymentStatus: 'success',
+          billing,
+          items,
+          totalPrice,
+          status: 'Paid',
           date: new Date().toISOString()
         };
         storage.set(`orders_${user.email}`, [
@@ -62,7 +61,7 @@ const Checkout = () => {
           order
         ]);
         clearCart();
-        navigate('/orders');
+        navigate('/my-orders');
       },
       prefill: {
         name: billing.name,
@@ -86,7 +85,6 @@ const Checkout = () => {
       <Paper sx={{ p: 4, width: '100%', maxWidth: 600 }}>
         <Typography variant="h5" sx={{ mb: 2 }}>Checkout</Typography>
 
-        {/* Billing Details */}
         <TextField label="Name" fullWidth sx={{ mb: 2 }}
           value={billing.name} onChange={e => handleChange('name', e.target.value)} />
         <TextField label="Email" fullWidth sx={{ mb: 2 }}
@@ -96,7 +94,6 @@ const Checkout = () => {
         <TextField label="Address" fullWidth sx={{ mb: 2 }}
           value={billing.address} onChange={e => handleChange('address', e.target.value)} />
 
-        {/* Cart Summary */}
         <Typography variant="h6" sx={{ mt: 3 }}>Cart Summary</Typography>
         <List dense>
           {items.map(item => (
@@ -112,7 +109,6 @@ const Checkout = () => {
           Total Payable: ₹{totalPrice}
         </Typography>
 
-        {/* Pay Now Button */}
         <Button
           variant="contained"
           color="primary"
@@ -124,7 +120,6 @@ const Checkout = () => {
         </Button>
       </Paper>
 
-      {/* Popup Snackbar */}
       <Snackbar
         open={!!popup}
         autoHideDuration={3000}

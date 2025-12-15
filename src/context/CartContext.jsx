@@ -3,14 +3,11 @@ import { storage } from '../services/storage.js';
 import { useAuth } from './AuthContext.jsx';
 
 const CartContext = createContext(null);
-const CART_KEY = 'app_cart';
 
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
 
-
   const userCartKey = user ? `cart_${user.email}` : 'cart_guest';
-
 
   const [items, setItems] = useState(storage.get(userCartKey, []));
 
@@ -62,7 +59,6 @@ export const CartProvider = ({ children }) => {
         key: newKey
       };
       const filtered = prev.filter(i => i.key !== oldKey);
-      
       const same = filtered.find(i => i.key === newKey);
       if (same) {
         return filtered.map(i =>
@@ -81,7 +77,14 @@ export const CartProvider = ({ children }) => {
   const totalPrice = items.reduce((sum, i) => sum + i.totalPrice, 0);
 
   const value = useMemo(() => ({
-    items, addItem, updateQuantity, updateWeight, clearCart, totalCount, totalPrice
+    items,
+    addItem,
+    updateQuantity,
+    updateWeight,
+    clearCart,
+    totalCount,
+    totalPrice,
+    setItems   
   }), [items, totalCount, totalPrice]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
