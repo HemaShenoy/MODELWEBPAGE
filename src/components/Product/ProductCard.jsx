@@ -10,13 +10,11 @@ import {
   MenuItem
 } from '@mui/material';
 import { useCart } from '../../context/CartContext.jsx';
-import { useAuth } from '../../context/AuthContext.jsx';
 
 const WEIGHTS = ['200', '400', '600'];
 
 const ProductCard = ({ product }) => {
   const { addItem, updateQuantity, items } = useCart();
-  const { user } = useAuth();
   const [weight, setWeight] = useState('200');
 
   const unitPrice = product.prices[weight];
@@ -26,15 +24,12 @@ const ProductCard = ({ product }) => {
   const quantity = cartItem?.quantity || 0;
 
   const handleAdd = () => {
-    const res = addItem({
+    addItem({
       productId: product.id,
       name: product.name,
       weight,
       unitPrice
     });
-    if (res?.error === 'AUTH_REQUIRED') {
-      alert('Please login to add items to cart.');
-    }
   };
 
   return (
@@ -43,10 +38,9 @@ const ProductCard = ({ product }) => {
         display: 'flex',
         mb: 2,
         transition: 'transform 0.3s ease',
-        '&:hover': { transform: 'scale(1.02)' } // ✅ subtle zoom on card
+        '&:hover': { transform: 'scale(1.02)' }
       }}
     >
-      {/* ✅ Image with zoom effect */}
       <CardMedia
         component="img"
         image={product.image}
@@ -58,9 +52,7 @@ const ProductCard = ({ product }) => {
           borderRadius: 2,
           margin: 1,
           transition: 'transform 0.3s ease',
-          '&:hover': {
-            transform: 'scale(1.1)' // ✅ zoom image on hover
-          }
+          '&:hover': { transform: 'scale(1.1)' }
         }}
       />
       <CardContent sx={{ flex: 1 }}>
@@ -79,11 +71,7 @@ const ProductCard = ({ product }) => {
           </Select>
           <Typography variant="body1">₹ {unitPrice}</Typography>
           {!quantity ? (
-            <Button
-              variant="contained"
-              onClick={handleAdd}
-              disabled={!user}
-            >
+            <Button variant="contained" onClick={handleAdd}>
               Add to Cart
             </Button>
           ) : (

@@ -14,7 +14,11 @@ import {
   TextField,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import HomeIcon from '@mui/icons-material/Home';
@@ -38,6 +42,8 @@ const Orders = () => {
   const { mode, toggleMode } = useThemeMode();
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const [filter, setFilter] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState('');
   const navigate = useNavigate();
 
   const publicItems = [
@@ -59,12 +65,17 @@ const Orders = () => {
 
   const handleReorder = (order) => {
     setItems(order.items || order.cartItems || []);
-    alert('Items added back to cart!');
+    setDialogMessage('Items added back to cart!');
+    setDialogOpen(true);
+  };
+
+  const handlePayAgain = (order) => {
+    setItems(order.items || order.cartItems || []);
+    navigate('/checkout');
   };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
       <Sidebar
         onCategorySelect={() => navigate('/dashboard')}
         publicItems={publicItems}
@@ -72,7 +83,6 @@ const Orders = () => {
         onWidthChange={setSidebarWidth}
       />
 
-      {/* Main content */}
       <Box
         sx={{
           flexGrow: 1,
@@ -82,7 +92,6 @@ const Orders = () => {
           transition: 'margin-left 0.25s ease'
         }}
       >
-        {/* Top bar */}
         <AppBar position="static" color="default" elevation={0}>
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="h6">My Orders — {user ? user.email : 'Guest'}</Typography>
@@ -90,7 +99,7 @@ const Orders = () => {
               <IconButton onClick={toggleMode}>
                 {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
               </IconButton>
-              <IconButton onClick={() => navigate('/checkout')}>
+              <IconButton onClick={() => navigate('/cart')}>
                 <Badge badgeContent={totalCount} color="primary">
                   <ShoppingCartIcon />
                 </Badge>
@@ -99,7 +108,6 @@ const Orders = () => {
           </Toolbar>
         </AppBar>
 
-        {/* Orders list */}
         <Box sx={{ flex: 1, p: 2 }}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>
             You have placed {orders.length} orders so far.
@@ -129,13 +137,18 @@ const Orders = () => {
                 {(order.status || order.paymentStatus) && (
                   <Typography
                     variant="body2"
-                    sx={{ mt: 1, color: (order.status === 'Paid' || order.paymentStatus === 'success') ? 'green' : 'red' }}
+                    sx={{
+                      mt: 1,
+                      color:
+                        order.status === 'Paid' || order.paymentStatus === 'success'
+                          ? 'green'
+                          : 'red'
+                    }}
                   >
                     Status: {order.status || order.paymentStatus}
                   </Typography>
                 )}
 
-                {/* Expandable details */}
                 <Accordion sx={{ mt: 2 }}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography>View Details</Typography>
@@ -163,6 +176,17 @@ const Orders = () => {
                       Total Payable: ₹{order.totalPrice || order.totalAmount}
                     </Typography>
 
+                    {(order.status === 'Pending' || order.status === 'Failed' || order.paymentStatus === 'failed') && (
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        sx={{ mt: 2, mr: 2 }}
+                        onClick={() => handlePayAgain(order)}
+                      >
+                        Pay Again
+                      </Button>
+                    )}
+
                     <Button
                       variant="contained"
                       color="primary"
@@ -178,9 +202,20 @@ const Orders = () => {
           )}
         </Box>
 
-        {/* Footer */}
         <Footer />
       </Box>
+
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>Action Successful</DialogTitle>
+        <DialogContent>
+          <Typography>{dialogMessage}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setDialogOpen(false); navigate('/cart'); }} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

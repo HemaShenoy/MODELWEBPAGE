@@ -8,12 +8,16 @@ const USERS_KEY = 'app_users';
 const AUTH_KEY = 'app_auth';
 
 export const AuthProvider = ({ children }) => {
-  // Initialize from localStorage so login persists
   const [user, setUser] = useState(() => storage.get(AUTH_KEY, null));
   const [users, setUsers] = useState(() => storage.get(USERS_KEY, []));
 
-  useEffect(() => storage.set(AUTH_KEY, user), [user]);
-  useEffect(() => storage.set(USERS_KEY, users), [users]);
+  useEffect(() => {
+    storage.set(AUTH_KEY, user);
+  }, [user]);
+
+  useEffect(() => {
+    storage.set(USERS_KEY, users);
+  }, [users]);
 
   const register = ({ email, password }) => {
     if (users.find(u => u.email === email)) {
@@ -26,13 +30,7 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
-  const login = ({ email, password, role }) => {
-    // ✅ Guest login bypass
-    if (role === 'guest') {
-      setUser({ email: 'Guest', role: 'guest' });
-      return true;
-    }
-
+  const login = ({ email, password }) => {
     const found = users.find(u => u.email === email);
     if (!found) throw new Error('User not found');
     const plain = decryptPassword(found.password);
@@ -41,11 +39,14 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    return true;
+  };
 
-  // ✅ Expose guestLogin separately for convenience
+  // Guest browsing: just clear user (null)
   const guestLogin = () => {
-    setUser({ email: 'Guest', role: 'guest' });
+    setUser(null);
     return true;
   };
 

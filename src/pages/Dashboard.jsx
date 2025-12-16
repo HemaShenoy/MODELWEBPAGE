@@ -5,7 +5,12 @@ import {
   AppBar,
   Toolbar,
   Badge,
-  IconButton
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import HomeIcon from '@mui/icons-material/Home';
@@ -15,8 +20,8 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 import Sidebar from '../components/Sidebar/Sidebar.jsx';
 import ProductList from '../components/Product/ProductList.jsx';
-import CartSummary from '../components/Cart/CartSummary.jsx';
 import Footer from '../components/Footer/Footer.jsx';
+import Welcome from '../components/Welcome/Welcome.jsx'; // ✅ import new Welcome
 
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
@@ -25,32 +30,25 @@ import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [activeCategory, setActiveCategory] = useState(null);
-  const [sidebarWidth, setSidebarWidth] = useState(240); // default expanded
+  const [sidebarWidth, setSidebarWidth] = useState(240);
   const { user } = useAuth();
   const { totalCount } = useCart();
   const { mode, toggleMode } = useThemeMode();
   const navigate = useNavigate();
 
+  const [aboutDialog, setAboutDialog] = useState(false);
+
   const publicItems = [
     { key: 'home', label: 'Welcome', icon: <HomeIcon />, onClick: () => setActiveCategory(null) },
-    { key: 'about', label: 'About', icon: <InfoIcon />, onClick: () => alert('SweetShop demo app') }
+    { key: 'about', label: 'About', icon: <InfoIcon />, onClick: () => setAboutDialog(true) }
   ];
 
   const authItems = [
     { key: 'orders', label: 'My Orders', icon: <ShoppingCartIcon />, onClick: () => navigate('/orders') }
   ];
 
-  // ✅ Scroll to CartSummary instead of navigating away
-  const scrollToCartSummary = () => {
-    const el = document.getElementById('cart-summary');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
       <Sidebar
         onCategorySelect={setActiveCategory}
         publicItems={publicItems}
@@ -58,27 +56,15 @@ const Dashboard = () => {
         onWidthChange={setSidebarWidth}
       />
 
-      {/* Main content area */}
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          ml: `${sidebarWidth}px`,
-          transition: 'margin-left 0.25s ease'
-        }}
-      >
-        {/* Top bar */}
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', ml: `${sidebarWidth}px` }}>
         <AppBar position="static" color="default" elevation={0}>
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="h6">Welcome {user ? user.email : 'Guest'}</Typography>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              {/* Dark/Light mode toggle */}
               <IconButton onClick={toggleMode}>
                 {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
               </IconButton>
-              {/* Cart icon scrolls to CartSummary */}
-              <IconButton onClick={scrollToCartSummary}>
+              <IconButton onClick={() => navigate('/cart')}>
                 <Badge badgeContent={totalCount} color="primary">
                   <ShoppingCartIcon />
                 </Badge>
@@ -87,26 +73,30 @@ const Dashboard = () => {
           </Toolbar>
         </AppBar>
 
-        {/* Page content */}
         <Box sx={{ flex: 1, p: 2 }}>
-          {!activeCategory && (
-            <Typography variant="h5" sx={{ mb: 2 }}>
-              Welcome to SweetShop
-            </Typography>
+          {!activeCategory ? (
+            <Welcome onCategorySelect={setActiveCategory} />
+          ) : (
+            <ProductList activeCategory={activeCategory} />
           )}
-          <ProductList activeCategory={activeCategory} />
-
-          {/* ✅ CartSummary with id for scroll target */}
-          <Box id="cart-summary">
-            <CartSummary />
-          </Box>
         </Box>
 
-        {/* Footer */}
         <Footer />
       </Box>
+
+      {/* About dialog */}
+      <Dialog open={aboutDialog} onClose={() => setAboutDialog(false)}>
+        <DialogTitle>About SweetShop</DialogTitle>
+        <DialogContent>
+          <Typography>This is a demo SweetShop app built with React & Material‑UI.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAboutDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
 
 export default Dashboard;
+

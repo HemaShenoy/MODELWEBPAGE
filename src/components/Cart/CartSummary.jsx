@@ -1,59 +1,145 @@
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../context/CartContext.jsx';
-import { Paper, Typography, List, ListItem, ListItemText, Box, Button } from '@mui/material';
-import { storage } from '../../services/storage.js';
-import { useNavigate } from 'react-router-dom';   
+import {
+  Paper,
+  Typography,
+  List,
+  ListItem,
+  Box,
+  Button,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const CartSummary = () => {
   const { user } = useAuth();
-  const { items, totalCount, totalPrice, clearCart } = useCart();
-  const navigate = useNavigate();   
+  const { items, totalCount, totalPrice, clearCart, updateQuantity } = useCart();
+  const navigate = useNavigate();
 
- 
-  const ORDERS_KEY = user ? `orders_${user.email}` : 'orders_guest';
-
-  const handleCheckout = () => {
-    if (!items.length) return;
-    const existingOrders = storage.get(ORDERS_KEY, []);
-    const newOrder = { items, totalPrice, date: new Date().toISOString() };
-    storage.set(ORDERS_KEY, [...existingOrders, newOrder]);
-    clearCart();
-    alert('Order placed successfully!');
-  };
-
-  if (!user) {
-    return <Typography variant="body2" sx={{ mt: 2 }}>Please login to view your cart.</Typography>;
-  }
+  const [loginDialog, setLoginDialog] = useState(false);
 
   return (
     <Paper sx={{ p: 2, mt: 2 }}>
       <Typography variant="h6">Cart Summary</Typography>
-      <List dense>
-        {items.map(i => (
-          <ListItem key={i.key}>
-            <ListItemText
-              primary={`${i.name} — ${i.weight}g`}
-              secondary={`Qty: ${i.quantity} | Unit: ₹${i.unitPrice} | Subtotal: ₹${i.totalPrice}`}
-            />
-          </ListItem>
-        ))}
-      </List>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-        <Typography variant="subtitle1">Items: {totalCount}</Typography>
-        <Typography variant="subtitle1">Total: ₹ {totalPrice}</Typography>
-      </Box>
-      <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-        <Button variant="outlined" onClick={clearCart} disabled={!items.length}>Clear Cart</Button>
-        
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => navigate('/checkout')}
-          disabled={!items.length}
-        >
-          Go to Checkout
-        </Button>
-      </Box>
+
+      {items.length === 0 ? (
+        <Typography sx={{ mt: 2 }}>Your cart is empty.</Typography>
+      ) : (
+        <>
+          <List dense>
+            {items.map(i => (
+              <ListItem
+                key={i.key}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle1">
+                    {i.name} — {i.weight}g
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Unit: ₹{i.unitPrice} | Subtotal: ₹{i.totalPrice}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      updateQuantity(i.productId, i.weight, i.quantity - 1)
+                    }
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                    {i.quantity}
+                  </Typography>
+
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      updateQuantity(i.productId, i.weight, i.quantity + 1)
+                    }
+                  >
+                    <AddIcon />
+                  </IconButton>
+
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => updateQuantity(i.productId, i.weight, 0)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </ListItem>
+            ))}
+          </List>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+            <Typography variant="subtitle1">Items: {totalCount}</Typography>
+            <Typography variant="subtitle1">Total: ₹{totalPrice}</Typography>
+          </Box>
+
+          <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              onClick={clearCart}
+              disabled={!items.length}
+            >
+              Clear Cart
+            </Button>
+
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => {
+                if (user) {
+                  navigate('/checkout'); // ✅ logged-in users go to checkout
+                } else {
+                  setLoginDialog(true); // 🚫 guests see popup
+                }
+              }}
+              disabled={!items.length}
+            >
+              {user ? 'Go to Checkout' : 'Login to Checkout'}
+            </Button>
+          </Box>
+        </>
+      )}
+
+      {/* 🚫 Dialog for guests */}
+      <Dialog open={loginDialog} onClose={() => setLoginDialog(false)}>
+        <DialogTitle>Login Required</DialogTitle>
+        <DialogContent>
+          <Typography>Please login to continue to checkout.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLoginDialog(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              setLoginDialog(false);
+              navigate('/login'); // redirect to login page
+            }}
+            variant="contained"
+            color="primary"
+          >
+            Login
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };
