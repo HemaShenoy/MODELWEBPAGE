@@ -21,7 +21,7 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Sidebar from '../components/Sidebar/Sidebar.jsx';
 import ProductList from '../components/Product/ProductList.jsx';
 import Footer from '../components/Footer/Footer.jsx';
-import Welcome from '../components/Welcome/Welcome.jsx'; // ✅ import new Welcome
+import Welcome from '../components/Welcome/Welcome.jsx';
 
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
@@ -49,6 +49,7 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Sidebar */}
       <Sidebar
         onCategorySelect={setActiveCategory}
         publicItems={publicItems}
@@ -56,7 +57,9 @@ const Dashboard = () => {
         onWidthChange={setSidebarWidth}
       />
 
+      {/* Main content */}
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', ml: `${sidebarWidth}px` }}>
+        {/* Top AppBar */}
         <AppBar position="static" color="default" elevation={0}>
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="h6">Welcome {user ? user.email : 'Guest'}</Typography>
@@ -73,6 +76,7 @@ const Dashboard = () => {
           </Toolbar>
         </AppBar>
 
+        {/* Body */}
         <Box sx={{ flex: 1, p: 2 }}>
           {!activeCategory ? (
             <Welcome onCategorySelect={setActiveCategory} />
@@ -81,6 +85,7 @@ const Dashboard = () => {
           )}
         </Box>
 
+        {/* Footer */}
         <Footer />
       </Box>
 
@@ -99,4 +104,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

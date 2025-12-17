@@ -6,11 +6,19 @@ const ProductList = ({ activeCategory }) => {
   const filtered = PRODUCTS.filter(p => p.category === activeCategory);
 
   if (!activeCategory) {
-    return <Typography variant="body1" sx={{ mt: 2 }}>Select a category from the sidebar to view products.</Typography>;
+    return (
+      <Typography variant="body1" sx={{ mt: 2 }}>
+        Select a category from the sidebar to view products.
+      </Typography>
+    );
   }
 
   if (filtered.length === 0) {
-    return <Typography variant="body1" sx={{ mt: 2 }}>No products found in this category.</Typography>;
+    return (
+      <Typography variant="body1" sx={{ mt: 2 }}>
+        No products found in this category.
+      </Typography>
+    );
   }
 
   return (

@@ -7,9 +7,10 @@ import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Orders from './pages/Orders.jsx';
-import Checkout from './pages/CheckOut.jsx';   
+import Checkout from './pages/CheckOut.jsx';
 import CartPage from './pages/CartPage.jsx';
-import ProtectedRoute from './routes/ProtectedRoutes.jsx'; 
+import ProductDetail from './pages/ProdutDetails.jsx';   // ✅ new detail page
+import ProtectedRoute from './routes/ProtectedRoutes.jsx';
 
 const App = () => {
   return (
@@ -27,6 +28,9 @@ const App = () => {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/orders" element={<Orders />} />
+
+              {/* Product detail route */}
+              <Route path="/product/:id" element={<ProductDetail />} />
 
               {/* Protected route: checkout only */}
               <Route

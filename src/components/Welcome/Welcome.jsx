@@ -8,13 +8,33 @@ import {
   CardActions,
   Button,
   Chip,
-  CardActionArea
+  CardActionArea,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { PRODUCTS } from '../../data/products';
-import { useCart } from '../../context/CartContext.jsx'; // ✅ import cart context
+import { useCart } from '../../context/CartContext.jsx';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const Welcome = ({ onCategorySelect }) => {
-  const { addItem } = useCart(); // ✅ get addItem function
+  const { addItem } = useCart();
+  const navigate = useNavigate();
+
+  // ✅ Snackbar state
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+
+  const handleAddToCart = (product) => {
+    addItem({
+      productId: product.id,
+      name: product.name,
+      weight: '200', // default weight
+      unitPrice: product.prices['200']
+    });
+    setSnackbarMsg(`${product.name} (200g) added to cart!`);
+    setOpenSnackbar(true);
+  };
 
   return (
     <Box sx={{ p: 2 }}>
@@ -50,8 +70,8 @@ const Welcome = ({ onCategorySelect }) => {
                 }
               }}
             >
-              {/* Clicking the card navigates to category */}
-              <CardActionArea onClick={() => onCategorySelect(product.category)}>
+              {/* Clicking the card navigates to product detail */}
+              <CardActionArea onClick={() => navigate(`/product/${product.id}`)}>
                 <CardMedia
                   component="img"
                   height="200"
@@ -92,21 +112,18 @@ const Welcome = ({ onCategorySelect }) => {
 
               {/* Buttons */}
               <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                <Button variant="outlined" size="small">
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => navigate(`/product/${product.id}`)}
+                >
                   Details
                 </Button>
                 <Button
                   variant="contained"
                   size="small"
                   color="primary"
-                  onClick={() =>
-                    addItem({
-                      productId: product.id,
-                      name: product.name,
-                      weight: '200', // default weight
-                      unitPrice: product.prices['200']
-                    })
-                  }
+                  onClick={() => handleAddToCart(product)} // ✅ show snackbar
                 >
                   Add to Cart
                 </Button>
@@ -115,6 +132,22 @@ const Welcome = ({ onCategorySelect }) => {
           </Grid>
         ))}
       </Grid>
+
+      {/* Snackbar confirmation */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          {snackbarMsg}
+        </Alert>
+      </Snackbar>
 
       {/* Animations */}
       <style>
