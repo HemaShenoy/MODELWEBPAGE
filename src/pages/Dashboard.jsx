@@ -10,11 +10,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button
+  Button,
+  Tooltip
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import HomeIcon from '@mui/icons-material/Home';
 import InfoIcon from '@mui/icons-material/Info';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 
@@ -44,7 +46,7 @@ const Dashboard = () => {
   ];
 
   const authItems = [
-    { key: 'orders', label: 'My Orders', icon: <ShoppingCartIcon />, onClick: () => navigate('/orders') }
+    { key: 'orders', label: 'My Orders', icon: <ReceiptLongIcon />, onClick: () => navigate('/orders') }
   ];
 
   return (
@@ -64,9 +66,11 @@ const Dashboard = () => {
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="h6">Welcome {user ? user.email : 'Guest'}</Typography>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <IconButton onClick={toggleMode}>
-                {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
-              </IconButton>
+              <Tooltip title="Toggle theme">
+                <IconButton onClick={toggleMode}>
+                  {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+                </IconButton>
+              </Tooltip>
               <IconButton onClick={() => navigate('/cart')}>
                 <Badge badgeContent={totalCount} color="primary">
                   <ShoppingCartIcon />
@@ -93,7 +97,9 @@ const Dashboard = () => {
       <Dialog open={aboutDialog} onClose={() => setAboutDialog(false)}>
         <DialogTitle>About SweetShop</DialogTitle>
         <DialogContent>
-          <Typography>This is a demo SweetShop app built with React & Material‑UI.</Typography>
+          <Typography>
+            SweetShop brings you authentic sweets, snacks, beverages, and gift packs inspired by tradition.
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAboutDialog(false)}>Close</Button>

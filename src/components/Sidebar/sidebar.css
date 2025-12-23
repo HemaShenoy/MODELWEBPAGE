@@ -1,9 +1,12 @@
 /* Sidebar.css */
 .sidebar {
-  flex-shrink: 0;              /* Prevent sidebar from shrinking */
-  white-space: nowrap;         /* Keep labels from wrapping */
-  transition: width 0.25s ease; /* Smooth expand/collapse */
-  overflow-x: hidden;          /* Hide text when collapsed */
+  flex-shrink: 0;              
+  white-space: nowrap;         
+  transition: width 0.25s ease;
+  overflow-x: hidden;          
+  background: #fafafa;         
+  border-right: 1px solid #e0e0e0;
+  color: #333;
 }
 
 .sidebar .logo {
@@ -11,6 +14,9 @@
   align-items: center;
   gap: 8px;
   padding: 16px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #ff4081; /* brand accent */
 }
 
 .sidebar .navItem {
@@ -20,8 +26,26 @@
   padding: 10px 16px;
   cursor: pointer;
   border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+  color: #444;
 }
 
 .sidebar .navItem:hover {
-  background: rgba(0,0,0,0.06);
+  background: rgba(255, 64, 129, 0.1);
+  color: #ff4081;
+}
+
+.sidebar .navItem.selected {
+  background: rgba(255, 64, 129, 0.15);
+  color: #ff4081;
+  font-weight: 600;
+}
+
+.sidebar.collapsed .navItem {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar.collapsed .navItem span {
+  display: none;
 }

@@ -1,6 +1,17 @@
 import { useState } from 'react';
-import { Box, Typography, AppBar, Toolbar, IconButton, Badge } from '@mui/material';
+import {
+  Box,
+  Typography,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Badge,
+  Tooltip
+} from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import HomeIcon from '@mui/icons-material/Home';
+import InfoIcon from '@mui/icons-material/Info';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 
@@ -21,11 +32,11 @@ const CartPage = () => {
   const navigate = useNavigate();
 
   const publicItems = [
-    { key: 'home', label: 'Welcome', icon: <ShoppingCartIcon />, onClick: () => navigate('/dashboard') },
-    { key: 'about', label: 'About', icon: <ShoppingCartIcon />, onClick: () => alert('SweetShop demo app') }
+    { key: 'home', label: 'Welcome', icon: <HomeIcon />, onClick: () => navigate('/dashboard') },
+    { key: 'about', label: 'About', icon: <InfoIcon />, onClick: () => alert('SweetShop demo app') }
   ];
   const authItems = [
-    { key: 'orders', label: 'My Orders', icon: <ShoppingCartIcon />, onClick: () => navigate('/orders') }
+    { key: 'orders', label: 'My Orders', icon: <ReceiptLongIcon />, onClick: () => navigate('/orders') }
   ];
 
   return (
@@ -51,21 +62,33 @@ const CartPage = () => {
         {/* Top bar */}
         <AppBar position="static" color="default" elevation={0}>
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Cart — {user ? user.email : 'Guest'}</Typography>
+            <Typography variant="h6">
+              Cart — {user ? user.email : 'Guest'}
+            </Typography>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <IconButton onClick={toggleMode}>
-                {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+              <Tooltip title="Toggle theme">
+                <IconButton onClick={toggleMode}>
+                  {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+                </IconButton>
+              </Tooltip>
+              <IconButton onClick={() => navigate('/cart')}>
+                <Badge badgeContent={totalCount} color="primary">
+                  <ShoppingCartIcon />
+                </Badge>
               </IconButton>
-              <Badge badgeContent={totalCount} color="primary">
-                <ShoppingCartIcon />
-              </Badge>
             </Box>
           </Toolbar>
         </AppBar>
 
         {/* Cart summary content */}
         <Box sx={{ flex: 1, p: 2 }}>
-          <CartSummary />
+          {totalCount > 0 ? (
+            <CartSummary />
+          ) : (
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              Your cart is empty. Browse products to add items.
+            </Typography>
+          )}
         </Box>
 
         {/* Footer */}

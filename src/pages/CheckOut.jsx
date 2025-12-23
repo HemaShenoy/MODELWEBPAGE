@@ -12,7 +12,8 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Badge
+  Badge,
+  Alert
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -84,8 +85,8 @@ const Checkout = () => {
           paymentStatus: 'success',
           date: new Date().toISOString()
         };
-        storage.set(`orders_${user.email}`, [
-          ...(storage.get(`orders_${user.email}`, [])),
+        storage.set(`orders_${user?.email}`, [
+          ...(storage.get(`orders_${user?.email}`, [])),
           order
         ]);
         clearCart();
@@ -109,7 +110,7 @@ const Checkout = () => {
 
     rzp.on('payment.failed', function (response) {
       const order = {
-        orderId: response.error.metadata.payment_id || `fail_${Date.now()}`,
+        orderId: response.error.metadata?.payment_id || `fail_${Date.now()}`,
         billing,
         items,
         totalPrice,
@@ -117,8 +118,8 @@ const Checkout = () => {
         paymentStatus: 'failed',
         date: new Date().toISOString()
       };
-      storage.set(`orders_${user.email}`, [
-        ...(storage.get(`orders_${user.email}`, [])),
+      storage.set(`orders_${user?.email}`, [
+        ...(storage.get(`orders_${user?.email}`, [])),
         order
       ]);
       clearCart();
@@ -132,7 +133,7 @@ const Checkout = () => {
       <AppBar position="static" color="default" elevation={0}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="h6">
-            Checkout — {user.email}
+            Checkout — {user?.email || 'Guest'}
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <IconButton onClick={toggleMode}>
@@ -201,7 +202,7 @@ const Checkout = () => {
           <Typography variant="h6" sx={{ mt: 3 }}>Cart Summary</Typography>
           <List dense>
             {items.map(item => (
-              <ListItem key={item.key}>
+              <ListItem key={`${item.productId}-${item.weight}`}>
                 <ListItemText
                   primary={`${item.name} — ${item.weight}g`}
                   secondary={`Qty: ${item.quantity} | Price: ₹${item.totalPrice}`}
@@ -226,13 +227,17 @@ const Checkout = () => {
           </Button>
         </Paper>
 
-        {/* Snackbar for info */}
+        {/* Snackbar with Alert */}
         <Snackbar
           open={!!popup}
           autoHideDuration={3000}
           onClose={() => setPopup('')}
-          message={popup}
-        />
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert severity="info" onClose={() => setPopup('')} sx={{ width: '100%' }}>
+            {popup}
+          </Alert>
+        </Snackbar>
       </Box>
 
       <Footer />

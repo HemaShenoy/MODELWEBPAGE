@@ -18,11 +18,13 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Chip
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import HomeIcon from '@mui/icons-material/Home';
 import InfoIcon from '@mui/icons-material/Info';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -51,7 +53,7 @@ const Orders = () => {
     { key: 'about', label: 'About', icon: <InfoIcon />, onClick: () => alert('SweetShop demo app') }
   ];
   const authItems = [
-    { key: 'orders', label: 'My Orders', icon: <ShoppingCartIcon />, onClick: () => navigate('/orders') }
+    { key: 'orders', label: 'My Orders', icon: <ReceiptLongIcon />, onClick: () => navigate('/orders') }
   ];
 
   const ORDERS_KEY = user ? `orders_${user.email}` : 'orders_guest';
@@ -71,6 +73,8 @@ const Orders = () => {
 
   const handlePayAgain = (order) => {
     setItems(order.items || order.cartItems || []);
+    setDialogMessage('Redirecting to checkout...');
+    setDialogOpen(true);
     navigate('/checkout');
   };
 
@@ -92,6 +96,7 @@ const Orders = () => {
           transition: 'margin-left 0.25s ease'
         }}
       >
+        {/* Top bar */}
         <AppBar position="static" color="default" elevation={0}>
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="h6">My Orders — {user ? user.email : 'Guest'}</Typography>
@@ -108,6 +113,7 @@ const Orders = () => {
           </Toolbar>
         </AppBar>
 
+        {/* Body */}
         <Box sx={{ flex: 1, p: 2 }}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>
             You have placed {orders.length} orders so far.
@@ -123,11 +129,18 @@ const Orders = () => {
           />
 
           {!Array.isArray(filteredOrders) || filteredOrders.length === 0 ? (
-            <Typography>You have no orders yet. Start shopping now!</Typography>
+            <Box>
+              <Typography>You have no orders yet.</Typography>
+              <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/dashboard')}>
+                Start Shopping
+              </Button>
+            </Box>
           ) : (
             filteredOrders.map((order, idx) => (
               <Paper key={idx} sx={{ p: 2, mb: 2 }}>
-                <Typography variant="subtitle1">Order ID: {order.orderId || idx + 1}</Typography>
+                <Typography variant="subtitle1" sx={{ fontFamily: 'monospace' }}>
+                  Order ID: {order.orderId || idx + 1}
+                </Typography>
                 <Typography variant="caption">
                   Date: {order.date ? new Date(order.date).toLocaleString() : 'N/A'}
                 </Typography>
@@ -135,21 +148,15 @@ const Orders = () => {
                   Total Amount: ₹{order.totalPrice || order.totalAmount}
                 </Typography>
                 {(order.status || order.paymentStatus) && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      mt: 1,
-                      color:
-                        order.status === 'Paid' || order.paymentStatus === 'success'
-                          ? 'green'
-                          : 'red'
-                    }}
-                  >
-                    Status: {order.status || order.paymentStatus}
-                  </Typography>
+                  <Chip
+                    label={order.status || order.paymentStatus}
+                    color={order.status === 'Paid' || order.paymentStatus === 'success' ? 'success' : 'error'}
+                    size="small"
+                    sx={{ mt: 1 }}
+                  />
                 )}
 
-                <Accordion sx={{ mt: 2 }}>
+                <Accordion sx={{ mt: 2 }} defaultExpanded={idx === 0}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography>View Details</Typography>
                   </AccordionSummary>
@@ -205,8 +212,11 @@ const Orders = () => {
         <Footer />
       </Box>
 
+      {/* Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>Action Successful</DialogTitle>
+        <DialogTitle>
+          {dialogMessage.includes('cart') ? 'Reorder Successful' : 'Payment Action'}
+        </DialogTitle>
         <DialogContent>
           <Typography>{dialogMessage}</Typography>
         </DialogContent>

@@ -9,7 +9,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import Orders from './pages/Orders.jsx';
 import Checkout from './pages/CheckOut.jsx';
 import CartPage from './pages/CartPage.jsx';
-import ProductDetail from './pages/ProdutDetails.jsx';   // ✅ new detail page
+import ProductDetail from './pages/ProdutDetails.jsx';   
 import ProtectedRoute from './routes/ProtectedRoutes.jsx';
 
 const App = () => {

@@ -12,7 +12,7 @@ import {
   Snackbar,
   Alert
 } from '@mui/material';
-import { PRODUCTS } from '../../data/products';
+import { PRODUCTS } from '../../data/products.js';
 import { useCart } from '../../context/CartContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -32,8 +32,10 @@ const Welcome = ({ onCategorySelect }) => {
       weight: '200', // default weight
       unitPrice: product.prices['200']
     });
+    // reset snackbar to avoid overlap
+    setOpenSnackbar(false);
+    setTimeout(() => setOpenSnackbar(true), 50);
     setSnackbarMsg(`${product.name} (200g) added to cart!`);
-    setOpenSnackbar(true);
   };
 
   return (
@@ -54,84 +56,97 @@ const Welcome = ({ onCategorySelect }) => {
         Welcome to SweetShop
       </Typography>
 
-      {/* Product cards */}
-      <Grid container spacing={3}>
-        {PRODUCTS.map((product) => (
-          <Grid item xs={12} sm={6} md={4} key={product.id}>
-            <Card
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-8px)',
-                  boxShadow: 6
-                }
-              }}
-            >
-              {/* Clicking the card navigates to product detail */}
-              <CardActionArea onClick={() => navigate(`/product/${product.id}`)}>
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={product.image}
-                  alt={product.name}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6" fontWeight="bold">
-                      {product.name}
-                    </Typography>
-                    <Chip
-                      label={product.category.toUpperCase()}
-                      color={
-                        product.category === 'sweets'
-                          ? 'secondary'
-                          : product.category === 'snacks'
-                          ? 'warning'
-                          : 'primary'
-                      }
-                      size="small"
-                    />
-                  </Box>
-                  <Box sx={{ mt: 2 }}>
-                    {Object.entries(product.prices).map(([weight, price]) => (
-                      <Typography
-                        key={weight}
-                        variant="body2"
-                        sx={{ display: 'flex', justifyContent: 'space-between' }}
-                      >
-                        {weight}g — ₹{price}
+      {/* Empty product list handling */}
+      {PRODUCTS.length === 0 ? (
+        <Typography variant="body1" sx={{ mt: 2 }}>
+          No products available right now. Please check back later.
+        </Typography>
+      ) : (
+        <Grid container spacing={3}>
+          {PRODUCTS.map((product) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: 6
+                  }
+                }}
+              >
+                {/* Clicking the card navigates to product detail */}
+                <CardActionArea onClick={() => navigate(`/product/${product.id}`)}>
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={product.image}
+                    alt={product.name}
+                    sx={{ objectFit: 'cover' }}
+                  />
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="h6" fontWeight="bold">
+                        {product.name}
                       </Typography>
-                    ))}
-                  </Box>
-                </CardContent>
-              </CardActionArea>
+                      <Chip
+                        label={product.category.toUpperCase()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCategorySelect(product.category);
+                        }}
+                        clickable
+                        color={
+                          product.category === 'sweets'
+                            ? 'secondary'
+                            : product.category === 'snacks'
+                            ? 'warning'
+                            : 'primary'
+                        }
+                        size="small"
+                      />
+                    </Box>
+                    <Box sx={{ mt: 2 }}>
+                      {Object.entries(product.prices).map(([weight, price]) => (
+                        <Typography
+                          key={weight}
+                          variant="body2"
+                          sx={{ display: 'flex', justifyContent: 'space-between' }}
+                        >
+                          {weight}g — ₹{price}
+                        </Typography>
+                      ))}
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
 
-              {/* Buttons */}
-              <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => navigate(`/product/${product.id}`)}
-                >
-                  Details
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  onClick={() => handleAddToCart(product)} // ✅ show snackbar
-                >
-                  Add to Cart
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                {/* Buttons */}
+                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    aria-label={`View details of ${product.name}`}
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    Details
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    color="primary"
+                    aria-label={`Add ${product.name} to cart`}
+                    onClick={() => handleAddToCart(product)}
+                  >
+                    Add to Cart
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       {/* Snackbar confirmation */}
       <Snackbar

@@ -11,7 +11,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Chip
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -31,13 +32,18 @@ const CartSummary = () => {
       <Typography variant="h6">Cart Summary</Typography>
 
       {items.length === 0 ? (
-        <Typography sx={{ mt: 2 }}>Your cart is empty.</Typography>
+        <Box sx={{ mt: 2 }}>
+          <Typography>Your cart is empty.</Typography>
+          <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/dashboard')}>
+            Start Shopping
+          </Button>
+        </Box>
       ) : (
         <>
           <List dense>
             {items.map(i => (
               <ListItem
-                key={i.key}
+                key={`${i.productId}-${i.weight}`}
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -57,7 +63,7 @@ const CartSummary = () => {
                   <IconButton
                     size="small"
                     onClick={() =>
-                      updateQuantity(i.productId, i.weight, i.quantity - 1)
+                      i.quantity > 1 && updateQuantity(i.productId, i.weight, i.quantity - 1)
                     }
                   >
                     <RemoveIcon />
@@ -89,8 +95,8 @@ const CartSummary = () => {
           </List>
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Typography variant="subtitle1">Items: {totalCount}</Typography>
-            <Typography variant="subtitle1">Total: ₹{totalPrice}</Typography>
+            <Chip label={`Items: ${totalCount}`} color="primary" />
+            <Chip label={`Total: ₹${totalPrice}`} color="secondary" />
           </Box>
 
           <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
@@ -107,9 +113,9 @@ const CartSummary = () => {
               color="secondary"
               onClick={() => {
                 if (user) {
-                  navigate('/checkout'); // ✅ logged-in users go to checkout
+                  navigate('/checkout');
                 } else {
-                  setLoginDialog(true); // 🚫 guests see popup
+                  setLoginDialog(true);
                 }
               }}
               disabled={!items.length}
@@ -120,7 +126,7 @@ const CartSummary = () => {
         </>
       )}
 
-      {/* 🚫 Dialog for guests */}
+      {/* Dialog for guests */}
       <Dialog open={loginDialog} onClose={() => setLoginDialog(false)}>
         <DialogTitle>Login Required</DialogTitle>
         <DialogContent>
@@ -131,7 +137,7 @@ const CartSummary = () => {
           <Button
             onClick={() => {
               setLoginDialog(false);
-              navigate('/login'); // redirect to login page
+              navigate('/login');
             }}
             variant="contained"
             color="primary"

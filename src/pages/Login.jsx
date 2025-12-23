@@ -5,8 +5,13 @@ import {
   Paper,
   Typography,
   Box,
-  Snackbar
+  Snackbar,
+  Alert,
+  IconButton,
+  InputAdornment
 } from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 
@@ -18,6 +23,7 @@ const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [popup, setPopup] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -26,19 +32,21 @@ const Login = () => {
       setError('Email and password are required');
       return;
     }
+    // Basic email format check
+    if (!/\S+@\S+\.\S+/.test(form.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
     try {
-      login(form); // real login sets user in AuthContext
-      // If redirected from checkout, go back there after login
+      login(form);
       navigate(location.state?.from || '/dashboard');
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // ✅ Guest access handler (no user object created)
   const handleGuestLogin = () => {
     try {
-      // Do NOT call login — leave user = null
       navigate('/cart'); // guests can shop, but checkout is blocked
     } catch (err) {
       setPopup('Guest access failed');
@@ -50,10 +58,9 @@ const Login = () => {
       <Paper sx={{ p: 4, width: '100%', maxWidth: 420 }}>
         <Typography variant="h5" sx={{ mb: 2 }}>Login</Typography>
 
-        {/* Show message if redirected from protected route */}
-        {location.state?.from === '/checkout' && (
+        {location.state?.from && (
           <Typography color="error" sx={{ mb: 2 }}>
-            Please log in to continue to checkout.
+            Please log in to continue.
           </Typography>
         )}
 
@@ -69,16 +76,28 @@ const Login = () => {
           <TextField
             fullWidth
             label="Password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={form.password}
             onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
             sx={{ mb: 2 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
           />
-          {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
           <Button fullWidth variant="contained" type="submit">Login</Button>
         </Box>
 
-        {/* ✅ Guest access button */}
         <Button
           fullWidth
           variant="outlined"
@@ -87,6 +106,9 @@ const Login = () => {
         >
           Continue as Guest
         </Button>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+          Guests can browse and add items, but checkout requires login.
+        </Typography>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
           No account? <Link to="/register">Register</Link>
@@ -98,8 +120,12 @@ const Login = () => {
         open={!!popup}
         autoHideDuration={3000}
         onClose={() => setPopup('')}
-        message={popup}
-      />
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setPopup('')} sx={{ width: '100%' }}>
+          {popup}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
