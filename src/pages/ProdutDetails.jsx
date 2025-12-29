@@ -19,6 +19,9 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import HomeIcon from '@mui/icons-material/Home';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import InfoIcon from '@mui/icons-material/Info';
 
 import { PRODUCTS } from '../data/products.js';
 import { useCart } from '../context/CartContext.jsx';
@@ -44,10 +47,25 @@ const ProductDetail = () => {
   const cartItem = items.find(i => i.productId === product?.id && i.weight === weight);
   const quantity = cartItem?.quantity || 0;
 
+  // ✅ Sidebar items inline
+  const publicItems = [
+    { key: 'home', label: 'Welcome', icon: <HomeIcon />, onClick: () => navigate('/dashboard') },
+    { key: 'about', label: 'About Us', icon: <InfoIcon />, onClick: () => navigate('/info/about') }
+  ];
+  const authItems = [
+    { key: 'orders', label: 'My Orders', icon: <ReceiptLongIcon />, onClick: () => navigate('/orders') }
+  ];
+
   if (!product) {
     return (
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        <Sidebar onCategorySelect={() => navigate('/dashboard')} />
+        <Sidebar
+          onCategorySelect={(catId) => navigate(`/category/${catId}`)}
+          publicItems={publicItems}
+          authItems={authItems}
+          onWidthChange={() => {}}
+          activeCategory={null}
+        />
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', ml: '240px' }}>
           <AppBar position="static" color="default" elevation={0}>
             <Toolbar>
@@ -57,7 +75,13 @@ const ProductDetail = () => {
           <Box sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <ErrorOutlineIcon color="error" sx={{ fontSize: 48, mb: 2 }} />
             <Typography variant="h6" sx={{ mb: 2 }}>Sorry, this product does not exist.</Typography>
-            <Button variant="contained" onClick={() => navigate('/dashboard')}>
+            <Button
+              variant="contained"
+              onClick={() => {
+                navigate('/dashboard');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
               Back to Dashboard
             </Button>
           </Box>
@@ -81,12 +105,19 @@ const ProductDetail = () => {
   const handleBuyNow = () => {
     handleAdd();
     navigate('/checkout');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       {/* Sidebar */}
-      <Sidebar onCategorySelect={() => navigate('/dashboard')} />
+      <Sidebar
+        onCategorySelect={(catId) => navigate(`/category/${catId}`)}
+        publicItems={publicItems}
+        authItems={authItems}
+        onWidthChange={() => {}}
+        activeCategory={null}
+      />
 
       {/* Main content */}
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', ml: '240px' }}>
@@ -98,7 +129,13 @@ const ProductDetail = () => {
               <IconButton onClick={toggleMode} aria-label="Toggle theme">
                 {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
               </IconButton>
-              <IconButton onClick={() => navigate('/cart')} aria-label="View cart">
+              <IconButton
+                onClick={() => {
+                  navigate('/cart');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                aria-label="View cart"
+              >
                 <Badge badgeContent={totalCount} color="primary">
                   <ShoppingCartIcon />
                 </Badge>
@@ -114,7 +151,14 @@ const ProductDetail = () => {
               <img
                 src={product.image}
                 alt={product.name}
-                style={{ width: '100%', borderRadius: '8px' }}
+                style={{
+                  width: '250px',
+                  height: '250px',
+                  objectFit: 'contain',
+                  borderRadius: '8px',
+                  display: 'block',
+                  margin: '0 auto'
+                }}
               />
             </Grid>
             <Grid item xs={12} md={7}>
@@ -184,7 +228,13 @@ const ProductDetail = () => {
                 <Button variant="contained" color="primary" onClick={handleBuyNow}>
                   Buy Now
                 </Button>
-                <Button variant="outlined" onClick={() => navigate('/dashboard')}>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    navigate('/dashboard');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                >
                   Back to Dashboard
                 </Button>
               </Box>
@@ -195,8 +245,7 @@ const ProductDetail = () => {
         {/* Footer */}
         <Footer />
       </Box>
-
-      {/* Snackbar confirmation */}
+            {/* Snackbar confirmation */}
       <Snackbar
         open={!!popup}
         autoHideDuration={2000}
@@ -212,3 +261,4 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+

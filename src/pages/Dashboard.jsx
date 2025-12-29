@@ -28,20 +28,20 @@ import Welcome from '../components/Welcome/Welcome.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useThemeMode } from '../context/ThemeContext.jsx';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const Dashboard = () => {
-  const [activeCategory, setActiveCategory] = useState(null);
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const { user } = useAuth();
   const { totalCount } = useCart();
   const { mode, toggleMode } = useThemeMode();
   const navigate = useNavigate();
+  const { id } = useParams(); // ✅ category from URL
 
   const [aboutDialog, setAboutDialog] = useState(false);
 
   const publicItems = [
-    { key: 'home', label: 'Welcome', icon: <HomeIcon />, onClick: () => setActiveCategory(null) },
+    { key: 'home', label: 'Welcome', icon: <HomeIcon />, onClick: () => navigate('/dashboard') },
     { key: 'about', label: 'About', icon: <InfoIcon />, onClick: () => setAboutDialog(true) }
   ];
 
@@ -53,10 +53,11 @@ const Dashboard = () => {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       {/* Sidebar */}
       <Sidebar
-        onCategorySelect={setActiveCategory}
+        onCategorySelect={(catId) => navigate(`/category/${catId}`)} // ✅ navigate instead of setActiveCategory
         publicItems={publicItems}
         authItems={authItems}
         onWidthChange={setSidebarWidth}
+        activeCategory={id}
       />
 
       {/* Main content */}
@@ -82,10 +83,10 @@ const Dashboard = () => {
 
         {/* Body */}
         <Box sx={{ flex: 1, p: 2 }}>
-          {!activeCategory ? (
-            <Welcome onCategorySelect={setActiveCategory} />
+          {!id ? (
+            <Welcome onCategorySelect={(catId) => navigate(`/category/${catId}`)} />
           ) : (
-            <ProductList activeCategory={activeCategory} />
+            <ProductList activeCategory={id} />
           )}
         </Box>
 
