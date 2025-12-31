@@ -1,3 +1,4 @@
+// src/pages/Checkout.jsx
 import { useState } from 'react';
 import {
   Box,
@@ -11,29 +12,21 @@ import {
   ListItemAvatar,
   Avatar,
   Snackbar,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Badge,
   Alert,
   Grid
 } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { storage } from '../services/storage.js';
 import { useNavigate } from 'react-router-dom';
-import { useThemeMode } from '../context/ThemeContext.jsx';
 import Footer from '../components/Footer/Footer.jsx';
 import { PRODUCTS } from '../data/products.js';
+import Topbar from '../components/TopBar/Topbar.jsx';
 
 const Checkout = () => {
   const { user } = useAuth();
-  const { items, totalPrice, clearCart, totalCount } = useCart();
-  const { mode, toggleMode } = useThemeMode();
+  const { items, totalPrice, clearCart } = useCart();
   const navigate = useNavigate();
 
   const [billing, setBilling] = useState({
@@ -48,10 +41,10 @@ const Checkout = () => {
   const savedAddresses = storage.get(`addresses_${user?.email}`, []) || [];
 
   const handleChange = (field, value) =>
-    setBilling(prev => ({ ...prev, [field]: value }));
+    setBilling((prev) => ({ ...prev, [field]: value }));
 
   const handleSelectAddress = (value) => {
-    setBilling(prev => ({ ...prev, address: value }));
+    setBilling((prev) => ({ ...prev, address: value }));
   };
 
   const handleSaveAddress = () => {
@@ -98,7 +91,7 @@ const Checkout = () => {
     }
 
     const options = {
-      key: 'rzp_test_RqB16rwHoMJwx7', // your Razorpay test key
+      key: 'rzp_test_RqB16rwHoMJwx7', // Razorpay test key
       amount: totalPrice * 100,
       currency: 'INR',
       name: 'SweetShop Checkout',
@@ -157,26 +150,18 @@ const Checkout = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Top bar */}
-      <AppBar position="static" color="default" elevation={0}>
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="h6">
-            Checkout — {user?.email || 'Guest'}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <IconButton onClick={toggleMode}>
-              {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
-            </IconButton>
-            <IconButton onClick={() => navigate('/cart')}>
-              <Badge badgeContent={totalCount} color="primary">
-                <ShoppingCartIcon />
-              </Badge>
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      {/* Topbar */}
+      <Topbar
+        publicItems={[
+          { key: 'home', label: 'Home', onClick: () => navigate('/dashboard') },
+          { key: 'about', label: 'About', onClick: () => alert('SweetShop demo app') }
+        ]}
+        authItems={[
+          { key: 'orders', label: 'My Orders', onClick: () => navigate('/orders') }
+        ]}
+      />
 
-      {/* Main content centered */}
+      {/* Main content */}
       <Box
         sx={{
           flex: 1,
@@ -190,14 +175,31 @@ const Checkout = () => {
           {/* Left: Billing form */}
           <Grid item xs={12} md={7}>
             <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-              <Typography variant="h5" sx={{ mb: 2 }}>Billing Details</Typography>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Billing Details
+              </Typography>
 
-              <TextField label="Name" fullWidth sx={{ mb: 2 }}
-                value={billing.name} onChange={e => handleChange('name', e.target.value)} />
-              <TextField label="Email" fullWidth sx={{ mb: 2 }}
-                value={billing.email} onChange={e => handleChange('email', e.target.value)} />
-              <TextField label="Phone" fullWidth sx={{ mb: 2 }}
-                value={billing.phone} onChange={e => handleChange('phone', e.target.value)} />
+              <TextField
+                label="Name"
+                fullWidth
+                sx={{ mb: 2 }}
+                value={billing.name}
+                onChange={(e) => handleChange('name', e.target.value)}
+              />
+              <TextField
+                label="Email"
+                fullWidth
+                sx={{ mb: 2 }}
+                value={billing.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+              />
+              <TextField
+                label="Phone"
+                fullWidth
+                sx={{ mb: 2 }}
+                value={billing.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+              />
 
               {savedAddresses.length > 0 && (
                 <Box sx={{ mb: 2 }}>
@@ -219,14 +221,19 @@ const Checkout = () => {
                 </Box>
               )}
 
-              <TextField label="Address" fullWidth sx={{ mb: 2 }}
-                value={billing.address} onChange={e => handleChange('address', e.target.value)} />
+              <TextField
+                label="Address"
+                fullWidth
+                sx={{ mb: 2 }}
+                value={billing.address}
+                onChange={(e) => handleChange('address', e.target.value)}
+              />
 
               <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                 <TextField
                   label="Label (e.g. Home, Office)"
                   value={newLabel}
-                  onChange={e => setNewLabel(e.target.value)}
+                  onChange={(e) => setNewLabel(e.target.value)}
                   sx={{ flex: 1 }}
                 />
                 <Button variant="outlined" onClick={handleSaveAddress}>
@@ -256,17 +263,22 @@ const Checkout = () => {
           {/* Right: Cart details with images */}
           <Grid item xs={12} md={5}>
             <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-              <Typography variant="h5" sx={{ mb: 2 }}>Your Cart</Typography>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Your Cart
+              </Typography>
               <List>
-                {items.map(item => {
-                  const product = PRODUCTS.find(p => p.id === item.productId);
+                {items.map((item) => {
+                  const product = PRODUCTS.find((p) => p.id === item.productId);
                   return (
-                    <ListItem key={`${item.productId}-${item.weight}`} alignItems="flex-start">
+                    <ListItem
+                      key={`${item.productId}-${item.weight}`}
+                      alignItems="flex-start"
+                    >
                       <ListItemAvatar>
                         <Avatar
                           variant="rounded"
                           src={product?.image}
-                                                    sx={{ width: 56, height: 56, mr: 2 }}
+                          sx={{ width: 56, height: 56, mr: 2 }}
                         />
                       </ListItemAvatar>
                       <ListItemText
@@ -282,7 +294,7 @@ const Checkout = () => {
               </Typography>
             </Paper>
           </Grid>
-        </Grid>
+                </Grid>
       </Box>
 
       {/* Snackbar */}
@@ -297,10 +309,13 @@ const Checkout = () => {
         </Alert>
       </Snackbar>
 
+      {/* Footer */}
       <Footer />
     </Box>
   );
 };
 
 export default Checkout;
+
+      
 

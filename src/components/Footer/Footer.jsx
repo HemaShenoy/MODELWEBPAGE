@@ -1,3 +1,4 @@
+// src/components/Footer/Footer.jsx
 import { useState } from 'react';
 import {
   Box,
@@ -39,7 +40,6 @@ const Footer = () => {
 
   const handleNavigate = (route) => {
     navigate(route);
-    // ✅ Scroll to top after navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -47,9 +47,9 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        backgroundColor: '#f8f8f8',
-        color: '#333',
-        mt: 4,
+        backgroundColor: '#444',
+        color: '#fff',
+      
         pt: 6,
         pb: 4,
         px: { xs: 2, md: 6 }
@@ -58,20 +58,20 @@ const Footer = () => {
       <Grid container spacing={4}>
         {/* Brand / About */}
         <Grid item xs={12} md={3}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#fff' }}>
             SweetShop
           </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
+          <Typography variant="body2" sx={{ mb: 1, color: '#ddd' }}>
             Freshly made • Authentic taste • Gifting
           </Typography>
-          <Typography variant="body2" sx={{ mt: 2 }}>
+          <Typography variant="body2" sx={{ mt: 2, color: '#ddd' }}>
             Ah, the flavours of home… the taste of tradition! Relive childhood memories with our sweets, snacks and beverages.
           </Typography>
         </Grid>
 
-        {/* Shop links (from CATEGORIES) */}
+        {/* Shop links */}
         <Grid item xs={12} md={3}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#fff' }}>
             Shop
           </Typography>
           {CATEGORIES.map(cat => (
@@ -79,9 +79,8 @@ const Footer = () => {
               <Link
                 component="button"
                 underline="hover"
-                color="inherit"
-                aria-label={`Go to ${cat.label}`}
-                onClick={() => handleNavigate(`/category/${cat.id}`)}
+                sx={{ color: '#ddd' }}
+                onClick={() => handleNavigate(`/dashboard/${cat.id}`)} // ✅ correct route
               >
                 {cat.label}
               </Link>
@@ -91,7 +90,7 @@ const Footer = () => {
 
         {/* Important links */}
         <Grid item xs={12} md={3}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#fff' }}>
             Important Links
           </Typography>
           {infoLinks.map(link => (
@@ -99,8 +98,7 @@ const Footer = () => {
               <Link
                 component="button"
                 underline="hover"
-                color="inherit"
-                aria-label={`Open ${link.label}`}
+                sx={{ color: '#ddd' }}
                 onClick={() => handleNavigate(link.route)}
               >
                 {link.label}
@@ -111,10 +109,10 @@ const Footer = () => {
 
         {/* Newsletter */}
         <Grid item xs={12} md={3}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#fff' }}>
             Newsletter
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 2, color: '#ddd' }}>
             Sign up for exclusive offers, recipes, and updates.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
@@ -124,14 +122,12 @@ const Footer = () => {
               placeholder="Enter email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              sx={{ flex: 1 }}
-              aria-label="Newsletter email input"
+              sx={{ flex: 1, bgcolor: '#fff', borderRadius: 1 }}
             />
             <Button
               variant="contained"
-              color="primary"
+              color="secondary"
               onClick={handleSignup}
-              aria-label="Sign up for newsletter"
             >
               Sign up
             </Button>
@@ -140,8 +136,8 @@ const Footer = () => {
       </Grid>
 
       {/* Bottom bar */}
-      <Box sx={{ textAlign: 'center', mt: 4, pt: 2, borderTop: '1px solid #ddd' }}>
-        <Typography variant="caption" color="text.secondary">
+      <Box sx={{ textAlign: 'center', mt: 4, pt: 2, borderTop: '1px solid #666' }}>
+        <Typography variant="caption" sx={{ color: '#ccc' }}>
           © {new Date().getFullYear()} SweetShop. All rights reserved.
         </Typography>
       </Box>

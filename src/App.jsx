@@ -1,3 +1,4 @@
+// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
@@ -12,8 +13,11 @@ import CartPage from './pages/CartPage.jsx';
 import ProductDetail from './pages/ProdutDetails.jsx';
 import ProtectedRoute from './routes/ProtectedRoutes.jsx';
 import InfoPage from './pages/InfoPage.jsx';
+import SearchResults from './pages/SearchResults.jsx'; // ✅ new search page
 
-// ✅ Import ScrollToTop
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 import ScrollToTop from './components/scroll totop.jsx';
 
 const App = () => {
@@ -22,18 +26,30 @@ const App = () => {
       <CartProvider>
         <ThemeModeProvider>
           <BrowserRouter>
-            
             <ScrollToTop />
-
             <Routes>
-              <Route path="/" element={<Navigate to="/login" replace />} />
+              {/* Default route */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+              {/* Public routes */}
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/category/:id" element={<Dashboard />} />
+              <Route path="/dashboard/:id" element={<Dashboard />} /> {/* ✅ category inside dashboard */}
               <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/info/:section" element={<InfoPage />} />
+              <Route path="/search/:term" element={<SearchResults />} /> {/* ✅ global search */}
+
+              {/* Protected routes */}
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/checkout"
                 element={
@@ -42,8 +58,9 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/info/:section" element={<InfoPage />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
+
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </BrowserRouter>
         </ThemeModeProvider>

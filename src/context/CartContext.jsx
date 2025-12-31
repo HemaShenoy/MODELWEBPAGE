@@ -13,33 +13,39 @@ const CartContext = createContext(null);
 
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
-
-  // Use guest cart key if no user
   const userCartKey = user?.email ? `cart_${user.email}` : 'cart_guest';
-
-  // Always default to [] if storage returns null/undefined
   const [items, setItems] = useState(() => storage.get(userCartKey, []) || []);
 
-  // Reset items when userCartKey changes (login/logout)
   useEffect(() => {
-    setItems(storage.get(userCartKey, []) || []);
-  }, [userCartKey]);
+    const currentItems = storage.get(userCartKey, []) || [];
+    if (user?.email) {
+      const guestItems = storage.get('cart_guest', []) || [];
+      if (guestItems.length > 0) {
+        const merged = [...currentItems];
+        guestItems.forEach(g => {
+          const existing = merged.find(i => i.key === g.key);
+          if (existing) {
+            existing.quantity += g.quantity;
+            existing.totalPrice = existing.quantity * existing.unitPrice;
+          } else {
+            merged.push(g);
+          }
+        });
+        storage.set(userCartKey, merged);
+        storage.set('cart_guest', []);
+        setItems(merged);
+        return;
+      }
+    }
+    setItems(currentItems);
+  }, [userCartKey, user]);
 
-  // Persist cart whenever items change
   useEffect(() => {
     storage.set(userCartKey, items);
   }, [items, userCartKey]);
 
-  // Clear guest cart when user logs in
-  useEffect(() => {
-    if (user?.email) {
-      storage.set('cart_guest', []);
-    }
-  }, [user]);
-
   const key = (productId, weight) => `${productId}_${weight}`;
 
-  /** Add item to cart */
   const addItem = useCallback(({ productId, name, weight, unitPrice }) => {
     const k = key(productId, weight);
     setItems(prev => {
@@ -69,7 +75,6 @@ export const CartProvider = ({ children }) => {
     return { ok: true };
   }, []);
 
-  /** Update quantity of an item */
   const updateQuantity = useCallback((productId, weight, quantity) => {
     const k = key(productId, weight);
     setItems(prev => {
@@ -85,7 +90,6 @@ export const CartProvider = ({ children }) => {
     return { ok: true };
   }, []);
 
-  /** Update weight/price of an item */
   const updateWeight = useCallback(
     (productId, oldWeight, newWeight, newUnitPrice) => {
       const oldKey = key(productId, oldWeight);
@@ -121,13 +125,11 @@ export const CartProvider = ({ children }) => {
     []
   );
 
-  /** Clear cart */
   const clearCart = useCallback(() => {
     setItems([]);
     return { ok: true };
   }, []);
 
-  /** Totals */
   const totalCount = useMemo(
     () => (Array.isArray(items) ? items.reduce((sum, i) => sum + i.quantity, 0) : 0),
     [items]

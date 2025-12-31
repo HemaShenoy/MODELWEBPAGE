@@ -16,9 +16,11 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, guestLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -45,13 +47,13 @@ const Login = () => {
     }
   };
 
-  const handleGuestLogin = () => {
-    try {
-      navigate('/cart'); // guests can shop, but checkout is blocked
-    } catch (err) {
-      setPopup('Guest access failed');
-    }
-  };
+
+
+const handleGuestLogin = () => {
+  guestLogin();
+  navigate('/dashboard');   // ✅ go to dashboard instead of cart
+};
+
 
   return (
     <Box sx={{ display: 'grid', placeItems: 'center', minHeight: '100vh', p: 2 }}>
