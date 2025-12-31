@@ -28,7 +28,7 @@ import { storage } from '../services/storage.js';
 import { useNavigate } from 'react-router-dom';
 import { useThemeMode } from '../context/ThemeContext.jsx';
 import Footer from '../components/Footer/Footer.jsx';
-import { PRODUCTS } from '../data/products.js'; // ✅ import products with images
+import { PRODUCTS } from '../data/products.js';
 
 const Checkout = () => {
   const { user } = useAuth();
@@ -66,7 +66,22 @@ const Checkout = () => {
     setNewLabel('');
   };
 
-  const handlePayment = () => {
+  // ✅ Load Razorpay script dynamically
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayment = async () => {
     if (!items.length) {
       setPopup('Your cart is empty.');
       return;
@@ -75,7 +90,69 @@ const Checkout = () => {
       setPopup('Please fill in all billing details before proceeding.');
       return;
     }
-    // Razorpay integration...
+
+    const res = await loadRazorpay();
+    if (!res) {
+      setPopup('Failed to load payment gateway. Please try again.');
+      return;
+    }
+
+    const options = {
+      key: 'rzp_test_RqB16rwHoMJwx7', // your Razorpay test key
+      amount: totalPrice * 100,
+      currency: 'INR',
+      name: 'SweetShop Checkout',
+      description: 'Order Payment',
+      handler: function (response) {
+        const order = {
+          orderId: response.razorpay_payment_id,
+          billing,
+          items,
+          totalPrice,
+          status: 'Paid',
+          paymentStatus: 'success',
+          date: new Date().toISOString()
+        };
+        storage.set(`orders_${user?.email}`, [
+          ...(storage.get(`orders_${user?.email}`, [])),
+          order
+        ]);
+        clearCart();
+        navigate('/orders');
+      },
+      prefill: {
+        name: billing.name,
+        email: billing.email,
+        contact: billing.phone
+      },
+      theme: { color: '#3399cc' },
+      modal: {
+        ondismiss: function () {
+          navigate('/cart');
+        }
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+
+    rzp.on('payment.failed', function (response) {
+      const order = {
+        orderId: response.error.metadata?.payment_id || `fail_${Date.now()}`,
+        billing,
+        items,
+        totalPrice,
+        status: 'Failed',
+        paymentStatus: 'failed',
+        date: new Date().toISOString()
+      };
+      storage.set(`orders_${user?.email}`, [
+        ...(storage.get(`orders_${user?.email}`, [])),
+        order
+      ]);
+      clearCart();
+      navigate('/orders');
+    });
   };
 
   return (
@@ -189,8 +266,7 @@ const Checkout = () => {
                         <Avatar
                           variant="rounded"
                           src={product?.image}
-                          alt={item.name}
-                          sx={{ width: 56, height: 56, mr: 2 }}
+                                                    sx={{ width: 56, height: 56, mr: 2 }}
                         />
                       </ListItemAvatar>
                       <ListItemText
@@ -227,3 +303,4 @@ const Checkout = () => {
 };
 
 export default Checkout;
+
