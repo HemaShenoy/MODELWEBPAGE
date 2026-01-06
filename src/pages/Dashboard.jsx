@@ -31,7 +31,7 @@ const Dashboard = () => {
   const { id } = useParams(); // category from URL
   const [aboutDialog, setAboutDialog] = useState(false);
 
-  const isCategoryView = Boolean(id); // ✅ true if Topbar category clicked
+  const isCategoryView = Boolean(id); 
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -189,9 +189,12 @@ const OurStory = () => {
   );
 };
 
-const CategoryGrid = ({ onNavigate }) => { const categories = [ { key: 'sweets', label: 'Sweets', image: require('../assets/images/hi1.jpg') },
-   { key: 'snacks', label: 'Snacks', image: require('../assets/images/hi2.jpg') }, {
-   key: 'beverages', label: 'Beverages', image: require('../assets/images/hi3.jpg') } ];
+const CategoryGrid = ({ onNavigate }) => {
+  const categories = [
+    { key: 'sweets', label: 'Sweets', image: require('../assets/images/hi1.jpg') },
+    { key: 'snacks', label: 'Snacks', image: require('../assets/images/hi2.jpg') },
+    { key: 'beverages', label: 'Beverages', image: require('../assets/images/hi3.jpg') }
+  ];
 
   return (
     <Box sx={{ mt: 4 }}>
@@ -201,69 +204,68 @@ const CategoryGrid = ({ onNavigate }) => { const categories = [ { key: 'sweets',
 
       <Grid container spacing={3}>
         {categories.map((c) => (
-          <Grid item xs={12} sm={6} md={4} key={c.key}>
-<Card
-  sx={{
-    position: 'relative',
-    borderRadius: 3,
-    overflow: 'hidden',
-    cursor: 'pointer',
-    height: 320, // ✅ fixed square size
-    '&:hover': { boxShadow: 6, transform: 'scale(1.02)' },
-    transition: 'all 0.3s ease'
-  }}
-  onClick={() => onNavigate(c.key)}
->
-  {/* Background image */}
-  <CardMedia
-    component="img"
-    image={c.image}
-    alt={c.label}
-    sx={{
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover' // ✅ crops to fill square
-    }}
-  />
+          <Grid item xs={12} sm={6} md={3} key={c.key}>
+            <Card
+              sx={{
+                position: 'relative',
+                borderRadius: 2,
+                overflow: 'hidden',
+                cursor: 'pointer',
+                aspectRatio: '1 / 1',   // ✅ square cards
+                '&:hover': { boxShadow: 6, transform: 'scale(1.02)' },
+                transition: 'all 0.3s ease'
+              }}
+              onClick={() => onNavigate(c.key)}
+            >
+              {/* Background image */}
+              <CardMedia
+                component="img"
+                image={c.image}
+                alt={c.label}
+                sx={{
+                  width: 400,
+                  height: 400,
+                  objectFit: 'cover'
+                }}
+              />
 
-  {/* Overlay text + white button */}
-  <Box
-    sx={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      color: '#fff',
-      background: 'rgba(0,0,0,0.35)'
-    }}
-  >
-    <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-      {c.label}
-    </Typography>
-    <Button
-      variant="contained"
-      sx={{
-        bgcolor: '#fff',
-        color: '#000',
-        fontWeight: 600,
-        '&:hover': { bgcolor: '#f0f0f0' }
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onNavigate(c.key);
-      }}
-    >
-      Shop Now
-    </Button>
-  </Box>
-</Card>
-
+              {/* Overlay text + button */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  color: '#fff',
+                  background: 'rgba(0,0,0,0.35)'
+                }}
+              >
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+                  {c.label}
+                </Typography>
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: '#fff',
+                    color: '#000',
+                    fontWeight: 600,
+                    '&:hover': { bgcolor: '#f0f0f0' }
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNavigate(c.key);
+                  }}
+                >
+                  Shop Now
+                </Button>
+              </Box>
+            </Card>
           </Grid>
         ))}
       </Grid>
@@ -286,15 +288,43 @@ const NewArrivals = ({ onNavigate }) => {
       <Grid container spacing={2}>
         {items.map((p) => (
           <Grid item xs={12} sm={6} md={3} key={p.id}>
-            <Card sx={{ borderRadius: 3, overflow: 'hidden', height: '100%' }}>
-              <CardMedia component="img" height="160" image={p.image} alt={p.name} />
-              <CardContent>
+            <Card
+              sx={{
+                borderRadius: 3,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%'
+              }}
+            >
+              {/* ✅ Fixed image area */}
+              <CardMedia
+                component="img"
+                image={p.image}
+                alt={p.name}
+                sx={{
+                  width: 200,
+                  height: 200,          
+                  objectFit: 'cover'
+                }}
+              />
+
+              <CardContent sx={{ flexGrow: 1 }}>
                 <Typography sx={{ fontWeight: 600 }}>{p.name}</Typography>
-                <Typography color="text.secondary">{Object.keys(p.prices)[0]} g</Typography>
-                <Typography sx={{ mt: 1, fontWeight: 700 }}>₹{Object.values(p.prices)[0]}</Typography>
+                <Typography color="text.secondary">
+                  {Object.keys(p.prices)[0]} g
+                </Typography>
+                <Typography sx={{ mt: 1, fontWeight: 700 }}>
+                  ₹{Object.values(p.prices)[0]}
+                </Typography>
               </CardContent>
+
               <CardActions sx={{ px: 2, pb: 2 }}>
-                <Button variant="contained" size="small" onClick={() => onNavigate(p.category)}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => onNavigate(p.category)}
+                >
                   Shop Now
                 </Button>
               </CardActions>
@@ -305,6 +335,7 @@ const NewArrivals = ({ onNavigate }) => {
     </Box>
   );
 };
+
 
 const LifestyleSection = ({ onShopNamkeen }) => {
   return (

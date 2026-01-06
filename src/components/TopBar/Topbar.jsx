@@ -5,9 +5,7 @@ import {
   Toolbar,
   Typography,
   IconButton,
-  Button,
   Box,
-  Tooltip,
   Badge,
   InputBase,
   Paper,
@@ -18,17 +16,17 @@ import {
 } from '@mui/material';
 
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
-import LogoutIcon from '@mui/icons-material/Logout';
 
 import { useCart } from '../../context/CartContext.jsx';
-import { useThemeMode } from '../../context/ThemeContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import { PRODUCTS } from '../../data/products.js';
 import { useAuth } from '../../context/AuthContext.jsx';
+
+// Import your logo image
+import Logo from '../../assets/images/logo.jpg';
+
 
 const CATEGORIES = [
   { id: 'sweets', label: 'Sweets' },
@@ -38,9 +36,9 @@ const CATEGORIES = [
 
 const Topbar = () => {
   const { totalCount } = useCart();
-  const { mode, toggleMode } = useThemeMode();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
@@ -49,6 +47,7 @@ const Topbar = () => {
       navigate(`/search/${encodeURIComponent(search.trim())}`);
       setSearch('');
       setSuggestions([]);
+      setSearchOpen(false);
     }
   };
 
@@ -77,124 +76,85 @@ const Topbar = () => {
     navigate(`/search/${encodeURIComponent(term)}`);
     setSearch('');
     setSuggestions([]);
+    setSearchOpen(false);
   };
 
   return (
-    <AppBar
-      position="sticky"
-      elevation={1}
-      sx={{
-        bgcolor: '#fff',
-        color: '#000'
-      }}
-    >
+    <AppBar position="sticky" elevation={1} sx={{ bgcolor: '#fff', color: '#000' }}>
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
         {/* Logo */}
         <Box
           sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
           onClick={() => navigate('/dashboard')}
         >
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#000' }}>
-            SweetShop
-          </Typography>
+          <img src={Logo} alt="SweetShop Logo" style={{ height: 40 }} />
         </Box>
 
-        {/* Categories */}
+        {/* Categories with smaller text */}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           {CATEGORIES.map((cat) => (
-            <Button
+            <IconButton
               key={cat.id}
-              sx={{ color: '#000' }}
+              sx={{ color: '#000', fontSize: '1rem' }} // smaller text
               onClick={() => handleCategorySelect(cat.id)}
             >
               {cat.label}
-            </Button>
+            </IconButton>
           ))}
         </Box>
 
-        {/* Actions */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', position: 'relative' }}>
-          <Button sx={{ color: '#000' }} onClick={() => navigate('/orders')}>
-            My Orders
-          </Button>
+        {/* Right side: only 3 icons */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {/* Login */}
+          <IconButton sx={{ color: '#000' }} onClick={() => navigate('/login')}>
+            <PersonIcon />
+          </IconButton>
 
-          {user ? (
-            <Button
-              sx={{ color: '#000' }}
-              startIcon={<LogoutIcon />}
-              onClick={logout}
-            >
-              Logout
-            </Button>
-          ) : (
-            <Button
-              sx={{ color: '#000' }}
-              startIcon={<PersonIcon />}
-              onClick={() => navigate('/login')}
-            >
-              Login
-            </Button>
-          )}
+          {/* Search */}
+          <IconButton sx={{ color: '#000' }} onClick={() => setSearchOpen(!searchOpen)}>
+            <SearchIcon />
+          </IconButton>
 
-          <Tooltip title="Toggle theme">
-            <IconButton onClick={toggleMode} sx={{ color: '#000' }}>
-              {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
-            </IconButton>
-          </Tooltip>
-
+          {/* Cart */}
           <IconButton onClick={() => navigate('/cart')} sx={{ color: '#000' }}>
             <Badge badgeContent={totalCount} color="secondary">
               <ShoppingCartIcon />
             </Badge>
           </IconButton>
-
-          {/* Search with suggestions */}
-          <Box sx={{ position: 'relative' }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                bgcolor: 'rgba(0,0,0,0.05)',
-                px: 1,
-                borderRadius: 1
-              }}
-            >
-              <InputBase
-                placeholder="Search…"
-                value={search}
-                onChange={handleChange}
-                sx={{ color: '#000', ml: 1 }}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
-              <IconButton onClick={handleSearch} sx={{ color: '#000' }}>
-                <SearchIcon />
-              </IconButton>
-            </Box>
-
-            {suggestions.length > 0 && (
-              <Paper
-                sx={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  zIndex: 10
-                }}
-              >
-                <List>
-                  {suggestions.map((s) => (
-                    <ListItem key={s.id} disablePadding>
-                      <ListItemButton onClick={() => handleSuggestionClick(s.name)}>
-                        <ListItemText primary={s.name} secondary={s.category} />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </List>
-              </Paper>
-            )}
-          </Box>
         </Box>
       </Toolbar>
+
+      {/* Separate Search Bar */}
+      {searchOpen && (
+        <Box sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#fff', px: 1, borderRadius: 1 }}>
+            <InputBase
+              placeholder="Search…"
+              value={search}
+              onChange={handleChange}
+              sx={{ flex: 1, ml: 1 }}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <IconButton onClick={handleSearch} sx={{ color: '#000' }}>
+              <SearchIcon />
+            </IconButton>
+          </Box>
+
+          {suggestions.length > 0 && (
+            <Paper sx={{ mt: 1 }}>
+              <List>
+                {suggestions.map((s) => (
+                  <ListItem key={s.id} disablePadding>
+                    <ListItemButton onClick={() => handleSuggestionClick(s.name)}>
+                      <ListItemText primary={s.name} secondary={s.category} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          )}
+        </Box>
+      )}
     </AppBar>
   );
 };
