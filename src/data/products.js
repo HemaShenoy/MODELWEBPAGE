@@ -8,7 +8,7 @@ import samosaImg from '../assets/images/samosa.jpg';
 import pakoraImg from '../assets/images/pakora.jpg';
 
 import mangolassiImg from '../assets/images/mangolassi.jpg';
-import masalachaiImg from '../assets/images/masalachai.jpg';
+import masalachaiImg from '../assets/images/chai.jpg';
 import coldcoffeeImg from '../assets/images/coldcoffee.jpg';
 
 export const PRODUCTS = [
