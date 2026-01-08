@@ -22,6 +22,8 @@ import Topbar from '../components/TopBar/Topbar.jsx';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
+import ProductCard from '../components/Product/ProductCard'; // import from your ProductCard file
+
 // Hero slider dependency
 import Slider from 'react-slick';
 import { PRODUCTS } from '../data/products.js';
@@ -73,7 +75,7 @@ const Dashboard = () => {
   alt="Gift Banner"
   sx={{
     width: '100%',
-    maxHeight: 280,
+    maxHeight: '100%',
     objectFit: 'cover',
     borderRadius: 0,   
     display: 'block', 
@@ -129,7 +131,7 @@ const banners = [
               alt={b.alt}
               style={{
                 width: '100%',
-                height: '420px',
+                height: '100%',
                 objectFit: 'cover',
                 borderRadius: '12px'
               }}
@@ -147,13 +149,8 @@ const banners = [
           textShadow: '0 2px 8px rgba(0,0,0,0.4)'
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          We are accepting orders to UK now
-        </Typography>
-        <Typography sx={{ mt: 1 }}>Freshly made • Authentic taste • Perfect for gifting</Typography>
-        <Button variant="contained" color="secondary" sx={{ mt: 2 }} onClick={onShopNow}>
-          Shop Sweets
-        </Button>
+
+
       </Box>
     </Box>
   );
@@ -171,167 +168,231 @@ const OurStory = () => {
         textAlign: 'center'
       }}
     >
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-        Vellanki Foods
-      </Typography>
-      <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-        Our Story
-      </Typography>
-      <Typography sx={{ mb: 3, maxWidth: 700, mx: 'auto' }}>
-        In 1989, we realised that times were changing. With mothers beginning to work outside the home, 
-        it was increasingly difficult to invest the time and effort needed to prepare pickles and powders 
-        for the family. Home-made pickles were disappearing from the typical Telugu home.
-      </Typography>
-      <Button variant="contained" color="secondary">
-        Read More
-      </Button>
+<Typography 
+  variant="h9" 
+  sx={{ color: 'grey.500', fontWeight: 'normal', mb: 0 }} // ✅ no bottom margin
+>
+  Vellanki Foods
+</Typography>
+
+<Typography 
+  variant="h3" 
+  sx={{ fontWeight: 600 , mt: 0 }} // ✅ no top margin
+>
+  Our Story
+</Typography>
+
+<Typography
+  sx={{ mb: 3, maxWidth: 800, mx: 'auto', color: 'grey.700' }}
+>
+  In 1989, we realised that times were changing, with mothers beginning to work outside the home, it was 
+  <br />increasingly difficult to invest the time and effort needed to prepare pickles and powders for the family. <br />
+  Home-made pickles were disappearing from the typical Telugu home. 
+  
+</Typography>
+
+
+<Button
+  variant="outlined"
+  sx={{
+    color: '#D2B48C',            
+    border: '2px solid #D2B48C', 
+    fontWeight: 500,
+    backgroundColor: 'transparent',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      backgroundColor: '#D2B48C',  
+      color: '#444',              
+      borderColor: '#D2B48C'
+    }
+  }}
+>
+  Read More
+</Button>
+
+
     </Box>
   );
+
 };
+
+
 
 const CategoryGrid = ({ onNavigate }) => {
   const categories = [
     { key: 'sweets', label: 'Sweets', image: require('../assets/images/hi1.jpg') },
-    { key: 'snacks', label: 'Snacks', image: require('../assets/images/hi2.jpg') },
-    { key: 'beverages', label: 'Beverages', image: require('../assets/images/hi3.jpg') }
+    { key: 'namkeen', label: 'Namkeen', image: require('../assets/images/hi2.jpg') },
+    { key: 'pickles', label: 'Pickles', image: require('../assets/images/hi3.jpg') }
   ];
 
   return (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
-        Shop by category
-      </Typography>
+    <Box
+      sx={{
+        width: '100%',
+        px: { xs: 1, sm: 2, md: 4 },       // ✅ responsive padding
+        mt: 3,
+        display: 'flex',
+        flexDirection: 'row',
+        gap: { xs: 1, sm: 2, md: 3 },      // ✅ responsive gap
+        justifyContent: 'center',
+        flexWrap: 'wrap'
+      }}
+    >
+      {categories.map((c) => (
+        <Card
+          key={c.key}
+          onClick={() => onNavigate(c.key)}
+          sx={{
+            flex: { xs: '1 1 100%', sm: '1 1 calc(33.333% - 16px)' }, // ✅ equal width distribution
+            maxWidth: { sm: 'calc(33.333% - 16px)' },
+            aspectRatio: '1/1',              // ✅ perfect square
+            position: 'relative',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            borderRadius: 2,
+            boxShadow: 3,
+            transition: '0.3s',
+            '&:hover': {
+              boxShadow: 6,
+              transform: 'scale(1.02)'
+            }
+          }}
+        >
+          <CardMedia
+            component="img"
+            image={c.image}
+            alt={c.label}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
 
-      <Grid container spacing={3}>
-        {categories.map((c) => (
-          <Grid item xs={12} sm={6} md={3} key={c.key}>
-            <Card
-              sx={{
-                position: 'relative',
-                borderRadius: 2,
-                overflow: 'hidden',
-                cursor: 'pointer',
-                aspectRatio: '1 / 1',   // ✅ square cards
-                '&:hover': { boxShadow: 6, transform: 'scale(1.02)' },
-                transition: 'all 0.3s ease'
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              background: 'rgba(0,0,0,0.35)',
+              color: '#fff'
+            }}
+          >
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                fontWeight: 700, 
+                mb: 2,
+                fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' } // ✅ responsive text
               }}
-              onClick={() => onNavigate(c.key)}
             >
-              {/* Background image */}
-              <CardMedia
-                component="img"
-                image={c.image}
-                alt={c.label}
-                sx={{
-                  width: 400,
-                  height: 400,
-                  objectFit: 'cover'
-                }}
-              />
+              {c.label}
+            </Typography>
 
-              {/* Overlay text + button */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  color: '#fff',
-                  background: 'rgba(0,0,0,0.35)'
-                }}
-              >
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                  {c.label}
-                </Typography>
-                <Button
-                  variant="contained"
-                  sx={{
-                    bgcolor: '#fff',
-                    color: '#000',
-                    fontWeight: 600,
-                    '&:hover': { bgcolor: '#f0f0f0' }
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNavigate(c.key);
-                  }}
-                >
-                  Shop Now
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: '#fff',
+                color: '#000',
+                fontWeight: 'bold',
+                px: 4,
+                py: 1.5,
+                '&:hover': { bgcolor: '#f0f0f0' }
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigate(c.key);
+              }}
+            >
+              Shop Now
+            </Button>
+          </Box>
+        </Card>
+      ))}
     </Box>
   );
 };
 
 
 const NewArrivals = ({ onNavigate }) => {
-  const items = PRODUCTS.slice(0, 4);
+  const items = PRODUCTS;
+  let sliderRef = null;
+
+  const settings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    arrows: false,
+    responsive: [
+      { breakpoint: 1200, settings: { slidesToShow: 3 } },
+      { breakpoint: 900, settings: { slidesToShow: 2 } },
+      { breakpoint: 600, settings: { slidesToShow: 1 } },
+    ]
+  };
 
   return (
-    <Box sx={{ mt: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          New arrivals
-        </Typography>
-        <Button onClick={() => onNavigate('sweets')}>View all</Button>
+    <Box
+      sx={{
+        mt: 2,
+        mb: 2,
+        px: { xs: 2, sm: 3, md: 4 },
+        backgroundColor: '#f5f5f5'
+        // ❌ removed py
+      }}
+    >
+      {/* Header */}
+      <Box sx={{ textAlign: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+          <Button onClick={() => sliderRef?.slickPrev()} sx={{ minWidth: 'auto', p: 0 }}>
+            {'<'}
+          </Button>
+
+          <Typography variant="h5" sx={{ fontWeight: 'normal' }}>
+            New Arrivals
+          </Typography>
+
+          <Button onClick={() => sliderRef?.slickNext()} sx={{ minWidth: 'auto', p: 0 }}>
+            {'>'}
+          </Button>
+        </Box>
+
+        <Button
+          onClick={() => onNavigate('sweets')}
+          sx={{
+            mt: 0.5,
+            backgroundColor: 'transparent',
+            textDecoration: 'underline',
+            textTransform: 'none'
+          }}
+        >
+          View All
+        </Button>
       </Box>
-      <Grid container spacing={2}>
-        {items.map((p) => (
-          <Grid item xs={12} sm={6} md={3} key={p.id}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%'
-              }}
-            >
-              {/* ✅ Fixed image area */}
-              <CardMedia
-                component="img"
-                image={p.image}
-                alt={p.name}
-                sx={{
-                  width: 200,
-                  height: 200,          
-                  objectFit: 'cover'
-                }}
-              />
 
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography sx={{ fontWeight: 600 }}>{p.name}</Typography>
-                <Typography color="text.secondary">
-                  {Object.keys(p.prices)[0]} g
-                </Typography>
-                <Typography sx={{ mt: 1, fontWeight: 700 }}>
-                  ₹{Object.values(p.prices)[0]}
-                </Typography>
-              </CardContent>
-
-              <CardActions sx={{ px: 2, pb: 2 }}>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => onNavigate(p.category)}
-                >
-                  Shop Now
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {/* Slider */}
+      <Box
+        sx={{
+          width: '100%',
+          overflow: 'hidden',
+          pb: 0, // ✅ no space after cards
+          '& .slick-track': { display: 'flex' },
+          '& .slick-slide': { px: 1 } // ✅ single source of spacing
+        }}
+      >
+        <Slider ref={(s) => (sliderRef = s)} {...settings}>
+          {items.map((product) => (
+            <Box key={product.id}>
+              <ProductCard product={product} />
+            </Box>
+          ))}
+        </Slider>
+      </Box>
     </Box>
   );
 };
@@ -341,7 +402,9 @@ const LifestyleSection = ({ onShopNamkeen }) => {
   return (
     <Box
       sx={{
-        my: 5,
+        mt:3,
+        mb : 4,
+      
         p: { xs: 2, md: 3 },
         bgcolor: 'background.paper',
         borderRadius: 3,
@@ -349,42 +412,54 @@ const LifestyleSection = ({ onShopNamkeen }) => {
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
         alignItems: 'center',
-        gap: 3
+        gap: { xs: 4, md: 10 }
       }}
     >
       
-      <Box
-        component="img"
-        src={require('../assets/images/nibbles.jpg')}
-        alt="4pm Nibbles"
-        sx={{
-          width: { xs: '80%', md: '25%' },   
-          borderRadius: 2,
-          objectFit: 'cover',
-          boxShadow: 2,
-          margin: '0 auto'
-        }}
-      />
+<Box
+  component="img"
+  src={require('../assets/images/nibbles1.jpg')}
+  alt="4pm Nibbles"
+  sx={{
+    width: { xs: '90%', md: '50%' },   // increased size
+    borderRadius: 2,
+    objectFit: 'cover',
+    boxShadow: 0,
+    margin: '0 auto'
+  }}
+/>
+
 
       {/* Text side */}
       <Box sx={{ flex: 1 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+        <Typography variant="h5" sx={{ fontWeight: 400 }}>
           4pm Nibbles
         </Typography>
-        <Typography sx={{ mt: 1 }}>
-          Time for evening chai — and a delicious snack to go with it! Try our
-          traditional South Indian treats: muruku, chegodi, and Telangana chekkalu.
-          Light, protein-rich, and perfect with strong tea or coffee.
+        <Typography sx={{ mt: 2 }}>
+          Time for evening chai — and a delicious snack to  go with it!<br/> Try our
+          traditional South Indian treats: muruku, chegodi,<br/> and Telangana chekkalu.
+          Light, protein-rich, and perfect <br/>with strong tea or coffee.
         </Typography>
-        <Button sx={{ mt: 2 }} variant="contained" onClick={onShopNamkeen}>
-          Shop now
-        </Button>
+<Button
+  sx={{
+    mt: 2,
+    color: 'grey.800', 
+    textTransform: 'none',   
+    '&:hover': {
+      backgroundColor: 'transparent', 
+      textDecoration: 'underline'          
+    }
+  }}
+  variant="text"          
+  onClick={onShopNamkeen}
+>
+  Shop now
+</Button>
+
       </Box>
     </Box>
   );
 };
-
-
 const BlogPosts = () => {
   const posts = [
     { title: 'Winter is coming', img: require('../assets/images/winter.jpg') },
@@ -394,53 +469,65 @@ const BlogPosts = () => {
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
-        From our blog
+      <Typography variant="h5" sx={{ mb: 2, fontWeight: 700, textAlign: 'center' }}>
+        BLOG POSTS
       </Typography>
-      <Grid container spacing={2}>
+      <Box
+        sx={{
+          width: '100%',
+          px: { xs: 1, sm: 2, md: 4 },
+          display: 'flex',
+          flexDirection: 'row',
+          gap: { xs: 1, sm: 2, md: 3 },
+          justifyContent: 'center',
+          flexWrap: 'wrap'
+        }}
+      >
         {posts.map((b, idx) => (
-          <Grid item xs={12} sm={6} md={4} key={idx}>
-            {/* ✅ md={4} ensures 3 cards per row on desktop */}
-            <Card
+          <Card
+            key={idx}
+            sx={{
+              flex: { xs: '1 1 100%', sm: '1 1 calc(33.333% - 16px)' },
+              maxWidth: { sm: 'calc(33.333% - 16px)' },
+              borderRadius: 3,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: 3,
+              transition: '0.3s',
+              '&:hover': {
+                boxShadow: 6,
+                transform: 'scale(1.02)'
+              }
+            }}
+          >
+            <CardMedia
+              component="img"
+              image={b.img}
+              alt={b.title}
               sx={{
-                borderRadius: 3,
-                overflow: 'hidden',
-                height: '100%',
-                maxWidth: 320, // ✅ keeps cards smaller
-                margin: '0 auto'
+                width: '100%',
+                aspectRatio: '1 / 1',
+                objectFit: 'cover'
               }}
-            >
-              <CardMedia
-                component="img"
-                image={b.img}
-                alt={b.title}
-                sx={{
-                  width: '100%',
-                  aspectRatio: '1 / 1', // ✅ square image
-                  objectFit: 'cover'
-                }}
-              />
-              <CardContent>
-                <Typography sx={{ fontWeight: 600 }}>{b.title}</Typography>
-                <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
-                  quis efficitur ligula.
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ px: 2, pb: 2 }}>
-                <Button size="small" variant="outlined">
-                  Read more
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
+            />
+            <CardContent sx={{ flexGrow: 1 }}>
+              <Typography sx={{ fontWeight: 600 }}>{b.title}</Typography>
+              <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
+                quis efficitur ligula.
+              </Typography>
+            </CardContent>
+            <CardActions sx={{ px: 2, pb: 2 }}>
+              <Button size="small" variant="outlined">
+                Read more
+              </Button>
+            </CardActions>
+          </Card>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 };
-
-
-
 
 export default Dashboard;

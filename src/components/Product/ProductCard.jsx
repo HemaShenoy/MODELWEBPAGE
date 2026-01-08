@@ -62,12 +62,17 @@ const ProductCard = ({ product }) => {
       onClick={() => navigate(`/product/${product.id}`)}
     >
       {/* IMAGE */}
-      <CardMedia
-        component="img"
-        image={product.image}
-        alt={product.name}
-        sx={{ height: 220, objectFit: 'cover' }}
-      />
+<CardMedia
+  component="img"
+  image={product.image}
+  alt={product.name}
+  sx={{
+    width: '100%',
+    aspectRatio: '1 / 1',   // makes it square
+    objectFit: 'cover'
+  }}
+/>
+
 
       {/* CONTENT */}
       <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
