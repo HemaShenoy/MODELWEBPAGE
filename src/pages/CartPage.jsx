@@ -1,5 +1,4 @@
-// src/pages/CartPage.jsx
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import CartSummary from '../components/Cart/CartSummary.jsx';
@@ -14,25 +13,40 @@ const CartPage = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Topbar */}
-      <Topbar
-        publicItems={[
-          { key: 'home', label: 'Home', onClick: () => navigate('/dashboard') },
-          { key: 'about', label: 'About', onClick: () => alert('SweetShop demo app') }
-        ]}
-        authItems={[
-          { key: 'orders', label: 'My Orders', onClick: () => navigate('/orders') }
-        ]}
-      />
+      
+      {/* Topbar (cart icon stays here automatically) */}
+      <Topbar />
 
-      {/* Cart summary content */}
-      <Box sx={{ flex: 1, p: 2 }}>
+      {/* Cart Content */}
+      <Box sx={{ flex: 1, p: 3 }}>
         {totalCount > 0 ? (
-          <CartSummary />
+          <>
+            {/* Keep Shopping */}
+            <Box sx={{ mb: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={() => navigate('/dashboard')}
+              >
+                ← Keep Shopping
+              </Button>
+            </Box>
+
+            {/* Cart Items */}
+            <CartSummary />
+          </>
         ) : (
-          <Typography variant="body1" sx={{ mt: 2 }}>
-            Your cart is empty. Browse products to add items.
-          </Typography>
+          <>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Your cart is empty.
+            </Typography>
+
+            <Button
+              variant="contained"
+              onClick={() => navigate('/dashboard')}
+            >
+              Start Shopping
+            </Button>
+          </>
         )}
       </Box>
 

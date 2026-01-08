@@ -1,5 +1,5 @@
 export const CATEGORIES = [
-  { id: 'sweets', label: 'Sweets', icon: 'Cake' },
-  { id: 'snacks', label: 'Snacks', icon: 'Fastfood' },
-  { id: 'beverages', label: 'Beverages', icon: 'LocalDrink' }
+  { id: 'sweets', label: 'SWEETS', icon: 'Cake' },
+  { id: 'snacks', label: 'SNACKS', icon: 'Fastfood' },
+  { id: 'beverages', label: 'BEVERAGES', icon: 'LocalDrink' }
 ];

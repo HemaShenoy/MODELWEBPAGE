@@ -1,9 +1,7 @@
-// src/components/Topbar/Topbar.jsx
 import { useState } from 'react';
 import {
   AppBar,
   Toolbar,
-  Typography,
   IconButton,
   Box,
   Badge,
@@ -12,7 +10,12 @@ import {
   List,
   ListItem,
   ListItemButton,
-  ListItemText
+  ListItemText,
+  Avatar,
+  Menu,
+  MenuItem,
+  Divider,
+  Typography
 } from '@mui/material';
 
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -24,9 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import { PRODUCTS } from '../../data/products.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 
-// Import your logo image
 import Logo from '../../assets/images/logo.jpg';
-
 
 const CATEGORIES = [
   { id: 'sweets', label: 'Sweets' },
@@ -36,11 +37,13 @@ const CATEGORIES = [
 
 const Topbar = () => {
   const { totalCount } = useCart();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleSearch = () => {
     if (search.trim()) {
@@ -79,6 +82,14 @@ const Topbar = () => {
     setSearchOpen(false);
   };
 
+  // Profile menu handlers
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <AppBar position="sticky" elevation={1} sx={{ bgcolor: '#fff', color: '#000' }}>
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
@@ -90,12 +101,12 @@ const Topbar = () => {
           <img src={Logo} alt="SweetShop Logo" style={{ height: 40 }} />
         </Box>
 
-        {/* Categories with smaller text */}
+        {/* Categories */}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           {CATEGORIES.map((cat) => (
             <IconButton
               key={cat.id}
-              sx={{ color: '#000', fontSize: '1rem' }} // smaller text
+              sx={{ color: '#000', fontSize: '1rem' }}
               onClick={() => handleCategorySelect(cat.id)}
             >
               {cat.label}
@@ -103,12 +114,41 @@ const Topbar = () => {
           ))}
         </Box>
 
-        {/* Right side: only 3 icons */}
+        {/* Right side */}
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          {/* Login */}
-          <IconButton sx={{ color: '#000' }} onClick={() => navigate('/login')}>
-            <PersonIcon />
-          </IconButton>
+          {/* Login/Profile */}
+{user ? (
+  <>
+    <IconButton onClick={handleMenuOpen}>
+      <Avatar sx={{ bgcolor: 'secondary.main' }}>
+        {user.email.charAt(0).toUpperCase()}
+      </Avatar>
+    </IconButton>
+    <Menu
+      anchorEl={anchorEl}
+      open={Boolean(anchorEl)}
+      onClose={handleMenuClose}
+    >
+      <Box sx={{ px: 2, py: 1 }}>
+        <Typography variant="subtitle1">{user.name}</Typography>
+        <Typography variant="body2">{user.email}</Typography>
+        <Typography variant="body2">{user.location || 'India'}</Typography>
+      </Box>
+      <Divider />
+      <MenuItem onClick={() => { navigate('/profile'); handleMenuClose(); }}>
+        My Account
+      </MenuItem>
+      <MenuItem onClick={() => { logout(); navigate('/login'); handleMenuClose(); }}>
+        Log out
+      </MenuItem>
+    </Menu>
+  </>
+) : (
+  <IconButton sx={{ color: '#000' }} onClick={() => navigate('/login')}>
+    <PersonIcon />
+  </IconButton>
+)}
+
 
           {/* Search */}
           <IconButton sx={{ color: '#000' }} onClick={() => setSearchOpen(!searchOpen)}>
@@ -124,7 +164,7 @@ const Topbar = () => {
         </Box>
       </Toolbar>
 
-      {/* Separate Search Bar */}
+      {/* Search Bar */}
       {searchOpen && (
         <Box sx={{ p: 2, bgcolor: '#f5f5f5' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#fff', px: 1, borderRadius: 1 }}>

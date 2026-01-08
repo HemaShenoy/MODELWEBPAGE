@@ -13,7 +13,8 @@ import CartPage from './pages/CartPage.jsx';
 import ProductDetail from './pages/ProdutDetails.jsx';
 import ProtectedRoute from './routes/ProtectedRoutes.jsx';
 import InfoPage from './pages/InfoPage.jsx';
-import SearchResults from './pages/SearchResults.jsx'; // ✅ new search page
+import SearchResults from './pages/SearchResults.jsx'; 
+import ProfilePage from './pages/ProfilePage.jsx';
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -40,7 +41,7 @@ const App = () => {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/info/:section" element={<InfoPage />} />
               <Route path="/search/:term" element={<SearchResults />} /> {/* ✅ global search */}
-
+              <Route path="/profile" element={<ProfilePage />} />
               {/* Protected routes */}
               <Route
                 path="/orders"

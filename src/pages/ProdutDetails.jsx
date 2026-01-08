@@ -1,398 +1,357 @@
-// src/pages/ProductDetail.jsx
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   Box,
   Typography,
   Button,
-  Select,
-  MenuItem,
-  Snackbar,
-  Alert,
   Grid,
-  Chip,
   Rating,
-  LinearProgress
+  LinearProgress,
+  Chip
 } from '@mui/material';
 
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-
-import { PRODUCTS } from '../data/products.js';
-import { useCart } from '../context/CartContext.jsx';
-import Footer from '../components/Footer/Footer.jsx';
-import { useAuth } from '../context/AuthContext.jsx';
-import Topbar from '../components/TopBar/Topbar.jsx';
+import { PRODUCTS } from '../data/products';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import Topbar from '../components/TopBar/Topbar';
+import Footer from '../components/Footer/Footer';
 
 const WEIGHTS = ['200', '400', '600'];
+const IMAGE_SIZE = 380;
+const muted = '#6b7280';
 
-const ProductDetail = () => {
+const ProductDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const product = PRODUCTS.find((p) => p.id === id);
+  const product = PRODUCTS.find(p => p.id === id);
 
   const { addItem, updateQuantity, items } = useCart();
   const { user } = useAuth();
 
+  const [imageIndex, setImageIndex] = useState(0);
   const [weight, setWeight] = useState('200');
-  const [popup, setPopup] = useState('');
-  const [reviews, setReviews] = useState([]); // start empty
-  const [newReview, setNewReview] = useState({ name: '', rating: 0, comment: '' });
+  const [reviews, setReviews] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [review, setReview] = useState({ rating: null, comment: '' });
 
-  // Load reviews from localStorage on mount
+  /* 🔴 HOOKS MUST RUN BEFORE ANY RETURN */
   useEffect(() => {
-    if (product?.id) {
-      const storageKey = `reviews_${product.id}`;
-      const savedReviews = localStorage.getItem(storageKey);
-      if (savedReviews) {
-        try {
-          setReviews(JSON.parse(savedReviews));
-        } catch (error) {
-          console.error('Error parsing reviews from localStorage:', error);
-        }
-      }
-    }
-  }, [product?.id]);
+    if (!product) return;
+    const saved = localStorage.getItem(`reviews_${product.id}`);
+    if (saved) setReviews(JSON.parse(saved));
+  }, [product]);
 
-  // Save reviews to localStorage whenever they change
   useEffect(() => {
-    if (product?.id && reviews.length > 0) {
-      const storageKey = `reviews_${product.id}`;
-      localStorage.setItem(storageKey, JSON.stringify(reviews));
-    }
-  }, [reviews, product?.id]);
+    if (!product) return;
+    localStorage.setItem(`reviews_${product.id}`, JSON.stringify(reviews));
+  }, [reviews, product]);
 
-  const unitPrice = product?.prices[weight];
+  if (!product) return null;
+
+  const images = [product.image, product.image];
+  const unitPrice = product.prices[weight];
+
   const cartItem = items.find(
-    (i) => i.productId === product?.id && i.weight === weight
+    i => i.productId === product.id && i.weight === weight
   );
   const quantity = cartItem?.quantity || 0;
 
-  const averageRating =
+  const avgRating =
     reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
       : 0;
 
-  if (!product) {
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Topbar
-          publicItems={[
-            { key: 'home', label: 'Home', onClick: () => navigate('/dashboard') },
-            { key: 'about', label: 'About', onClick: () => navigate('/info/about') }
-          ]}
-          authItems={[
-            { key: 'orders', label: 'My Orders', onClick: () => navigate('/orders') }
-          ]}
-        />
-        <Box
-          sx={{
-            flex: 1,
-            p: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <ErrorOutlineIcon color="error" sx={{ fontSize: 48, mb: 2 }} />
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Sorry, this product does not exist.
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={() => {
-              navigate('/dashboard');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            Back to Dashboard
-          </Button>
-        </Box>
-        <Footer />
-      </Box>
-    );
-  }
+  const submitReview = () => {
+    if (!user || !review.rating || !review.comment.trim()) return;
 
-  const handleAdd = () => {
-    addItem({
-      productId: product.id,
-      name: product.name,
-      weight,
-      unitPrice
-    });
-    setPopup('');
-    setTimeout(() => setPopup(`${product.name} (${weight}g) added to cart!`), 50);
-  };
+    setReviews([
+      {
+        id: Date.now(),
+        name: user.email.split('@')[0],
+        rating: review.rating,
+        comment: review.comment,
+        date: new Date().toLocaleDateString()
+      },
+      ...reviews
+    ]);
 
-  const handleBuyNow = () => {
-    handleAdd();
-    navigate('/checkout');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleReviewSubmit = () => {
-    if (!newReview.name || !newReview.comment || !newReview.rating) return;
-
-    const newEntry = {
-      id: Date.now(),
-      name: newReview.name,
-      date: new Date().toLocaleDateString('en-IN'),
-      rating: newReview.rating,
-      comment: newReview.comment
-    };
-
-    setReviews([newEntry, ...reviews]);
-    setNewReview({ name: '', rating: 0, comment: '' });
+    setReview({ rating: null, comment: '' });
     setShowForm(false);
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Topbar
-        publicItems={[
-          { key: 'home', label: 'Home', onClick: () => navigate('/dashboard') },
-          { key: 'about', label: 'About', onClick: () => navigate('/info/about') }
-        ]}
-        authItems={[
-          { key: 'orders', label: 'My Orders', onClick: () => navigate('/orders') }
-        ]}
-      />
+    <Box>
+      <Topbar />
 
-      <Box sx={{ flex: 1, p: 3 }}>
-        <Box sx={{ flex: 1, p: 3 }}>
-          {/* Product Section with image left and details right */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 4
-            }}
-          >
-            {/* Image on the left */}
-            <Box>
-              <img
-                src={product.image}
-                alt={product.name}
-                style={{
-                  width: '400px',
-                  height: '400px',
-                  objectFit: 'contain',
-                  borderRadius: '8px',
-                  transition: 'transform 0.35s ease',
-                  transformOrigin: 'center center'
+      {/* PRODUCT SECTION */}
+      <Box px={8} py={5}>
+        <Grid container spacing={5} alignItems="flex-start">
+          {/* LEFT IMAGE */}
+          <Grid item xs={12} md={6}>
+            <Box display="flex" gap={2}>
+              {/* THUMBNAILS */}
+              <Box display="flex" flexDirection="column" gap={1}>
+                {images.map((img, i) => (
+                  <Box
+                    key={i}
+                    component="img"
+                    src={img}
+                    onClick={() => setImageIndex(i)}
+                    sx={{
+                      width: 70,
+                      height: 70,
+                      objectFit: 'contain',
+                      border:
+                        imageIndex === i
+                          ? '2px solid teal'
+                          : '1px solid #ccc',
+                      cursor: 'pointer'
+                    }}
+                  />
+                ))}
+              </Box>
+
+              {/* MAIN IMAGE */}
+              <Box
+                sx={{
+                  width: IMAGE_SIZE,
+                  height: IMAGE_SIZE,
+                  border: '1px solid #eee',
+                  borderRadius: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-              />
-            </Box>
-
-            {/* Details on the right */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Typography variant="h4" sx={{ mb: 2 }}>
-                {product.name}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Ingredients:</strong> {product.ingredients}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Uses:</strong> {product.uses}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 3 }}>
-                <strong>Expiry:</strong> {product.expiry}
-              </Typography>
-
-              {/* Cart controls */}
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-                <Select size="small" value={weight} onChange={(e) => setWeight(e.target.value)}>
-                  {WEIGHTS.map((w) => (
-                    <MenuItem key={w} value={w}>
-                      {w}g
-                    </MenuItem>
-                  ))}
-                </Select>
-
-                <Typography variant="body1">₹ {unitPrice}</Typography>
-
-                {!quantity ? (
-                  <Button variant="contained" onClick={handleAdd}>
-                    Add to Cart
-                  </Button>
-                ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() =>
-                        quantity > 1 &&
-                        updateQuantity(product.id, weight, quantity - 1)
-                      }
-                    >
-                      -
-                    </Button>
-                    <Typography>{quantity}</Typography>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => updateQuantity(product.id, weight, quantity + 1)}
-                    >
-                      +
-                    </Button>
-                  </Box>
-                )}
-              </Box>
-
-              {quantity > 0 && (
-                <Chip
-                  label={`Total: ₹${quantity * unitPrice} (${weight}g × ${quantity})`}
-                  color="secondary"
-                  sx={{ mb: 2 }}
-                />
-              )}
-
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button variant="contained" color="primary" onClick={handleBuyNow}>
-                  Buy Now
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    navigate('/dashboard');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+              >
+                <img
+                  src={images[imageIndex]}
+                  alt={product.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain'
                   }}
+                />
+
+                <Button
+                  sx={{ position: 'absolute', left: 5 }}
+                  onClick={() =>
+                    setImageIndex(
+                      (imageIndex - 1 + images.length) % images.length
+                    )
+                  }
                 >
-                  Back to Dashboard
+                  ‹
+                </Button>
+
+                <Button
+                  sx={{ position: 'absolute', right: 5 }}
+                  onClick={() =>
+                    setImageIndex((imageIndex + 1) % images.length)
+                  }
+                >
+                  ›
                 </Button>
               </Box>
             </Box>
-          </Box>
-        </Box>
+          </Grid>
 
-        {/* Customer Reviews */}
-        <Box sx={{ mt: 5, textAlign: 'center' }}>
-          <Typography variant="h5" sx={{ mb: 1 }}>
-            Customer Reviews
-          </Typography>
+          {/* RIGHT DETAILS */}
+          <Grid item xs={12} md={6}>
+            <Rating value={avgRating} readOnly />
 
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
-            <Rating value={averageRating} precision={0.5} readOnly />
-            <Typography sx={{ ml: 1 }}>
-              {averageRating.toFixed(2)} out of 5
+            <Typography variant="h4" fontWeight={600} mt={1}>
+              {product.name}
             </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Based on {reviews.length} reviews ✔ Verified
-          </Typography>
 
-          {/* Rating Distribution with Bars */}
-          {[5, 4, 3, 2, 1].map((star) => {
-            const count = reviews.filter((r) => r.rating === star).length;
-            const percent = reviews.length ? (count / reviews.length) * 100 : 0;
-            return (
-              <Box key={star} sx={{ display: 'flex', alignItems: 'center', mb: 1, maxWidth: 400, mx: 'auto' }}>
-                <Typography sx={{ width: 40 }}>{star}★</Typography>
-                <LinearProgress
-                  variant="determinate"
-                  value={percent}
-                  sx={{ flex: 1, mx: 1, height: 10, borderRadius: 5 }}
-                />
-                <Typography sx={{ width: 40, textAlign: 'right' }}>
-                  {count}
-                </Typography>
-              </Box>
-            );
-          })}
+            <Typography variant="h5" sx={{ color: muted, mt: 1 }}>
+              ₹ {unitPrice}
+            </Typography>
 
-          {/* Reviews List */}
-          {reviews.map((review) => (
-            <Box
-              key={review.id}
-              sx={{
-                borderBottom: '1px solid #ddd',
-                mb: 2,
-                pb: 2,
-                maxWidth: 600,
-                mx: 'auto',
-                textAlign: 'left'
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Rating value={review.rating} readOnly size="small" />
-                <Typography variant="body2" sx={{ ml: 1 }}>
-                  {review.date}
-                </Typography>
-              </Box>
-              <Typography variant="subtitle2">{review.name} (Verified)</Typography>
-              <Typography variant="body2">{review.comment}</Typography>
-            </Box>
-          ))}
-
-          {/* Write a Review Button / Form */}
-          {!showForm ? (
-            <Button variant="outlined" sx={{ mt: 2 }} onClick={() => setShowForm(true)}>
-              Write a Review
-            </Button>
-          ) : (
-            <Box sx={{ mt: 3, maxWidth: 600, mx: 'auto', textAlign: 'left' }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Submit Your Review
-              </Typography>
-              <Box sx={{ mb: 2 }}>
-                <Typography>Name</Typography>
-                <input
-                  type="text"
-                  value={newReview.name}
-                  onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                  style={{ width: '100%', padding: '8px' }}
-                />
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography>Rating</Typography>
-                <Rating
-                  value={newReview.rating}
-                  onChange={(e, value) => setNewReview({ ...newReview, rating: value })}
-                />
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography>Comment</Typography>
-                <textarea
-                  rows={3}
-                  value={newReview.comment}
-                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                  style={{ width: '100%', padding: '8px' }}
-                />
-              </Box>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button variant="contained" onClick={handleReviewSubmit}>
-                  Submit Review
-                </Button>
-                <Button variant="text" onClick={() => setShowForm(false)}>
-                  Cancel
-                </Button>
+            {/* GRAMS BOXES */}
+            <Box mt={3}>
+              <Typography sx={{ color: muted, mb: 1 }}>Size</Typography>
+              <Box display="flex" gap={2}>
+                {WEIGHTS.map(w => (
+                  <Box
+                    key={w}
+                    onClick={() => setWeight(w)}
+                    sx={{
+                      px: 3,
+                      py: 1.2,
+                      border:
+                        weight === w ? '2px solid #333' : '1px solid #ccc',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {w} Gms
+                  </Box>
+                ))}
               </Box>
             </Box>
-          )}
-        </Box>
+
+            {/* CART */}
+            <Box mt={4}>
+              {!quantity ? (
+                <Button
+                  fullWidth
+                  sx={{ py: 1.4, background: '#2196F3', color: '#fff' }}
+                  onClick={() =>
+                    addItem({
+                      productId: product.id,
+                      name: product.name,
+                      weight,
+                      unitPrice
+                    })
+                  }
+                >
+                  ADD TO CART
+                </Button>
+              ) : (
+                <Box display="flex" gap={2} alignItems="center">
+                  <Button
+                    variant="outlined"
+                    onClick={() =>
+                      quantity > 1 &&
+                      updateQuantity(product.id, weight, quantity - 1)
+                    }
+                  >
+                    -
+                  </Button>
+                  <Typography>{quantity}</Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={() =>
+                      updateQuantity(product.id, weight, quantity + 1)
+                    }
+                  >
+                    +
+                  </Button>
+                </Box>
+              )}
+            </Box>
+
+            {quantity > 0 && (
+              <Chip
+                sx={{ mt: 2 }}
+                label={`Total ₹${quantity * unitPrice}`}
+              />
+            )}
+
+            {/* DETAILS */}
+            <Typography mt={4} sx={{ color: muted }}>
+              {product.details}
+            </Typography>
+            <Typography sx={{ color: muted }}>
+              <b>Ingredients:</b> {product.ingredients}
+            </Typography>
+            <Typography sx={{ color: muted }}>
+              <b>Uses:</b> {product.uses}
+            </Typography>
+            <Typography sx={{ color: muted }}>
+              <b>Expiry:</b> {product.expiry}
+            </Typography>
+            <Typography sx={{ color: muted }}>
+              <b>Shelf Life:</b> {product.shelfLife}
+            </Typography>
+            <Typography sx={{ color: muted }}>
+              <b>Shipping:</b> {product.shipping}
+            </Typography>
+          </Grid>
+        </Grid>
+
+ {/* REVIEWS */}
+<Box mt={10}>
+  <Typography align="center" variant="h5" fontWeight={600}>
+    CUSTOMER REVIEWS
+  </Typography>
+
+  {/* CENTERED SUMMARY */}
+  <Box display="flex" justifyContent="center" mt={3}>
+    <Grid
+      container
+      spacing={4}
+      maxWidth="md"
+      justifyContent="center"
+      alignItems="center"
+      textAlign="center"
+    >
+      <Grid item xs={12} md={4}>
+        <Rating value={avgRating} readOnly />
+        <Typography sx={{ color: muted }}>
+          {avgRating.toFixed(2)} out of 5
+        </Typography>
+        <Typography sx={{ color: muted }}>
+          Based on {reviews.length} reviews
+        </Typography>
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        {[5, 4, 3, 2, 1].map(star => {
+          const count = reviews.filter(r => r.rating === star).length;
+          const percent = reviews.length
+            ? (count / reviews.length) * 100
+            : 0;
+
+          return (
+            <Box key={star} display="flex" alignItems="center" mb={1}>
+              <Rating value={star} readOnly size="small" />
+              <LinearProgress
+                value={percent}
+                variant="determinate"
+                sx={{ flex: 1, mx: 2, height: 8 }}
+              />
+              <Typography>{count}</Typography>
+            </Box>
+          );
+        })}
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <Button variant="contained" onClick={() => setShowForm(true)}>
+          Write a review
+        </Button>
+      </Grid>
+    </Grid>
+  </Box>
+
+  {/* LEFT-ALIGNED REVIEW LIST */}
+  <Box mt={5} maxWidth={900} mx="auto">
+    {reviews.map(r => (
+      <Box key={r.id} py={3} borderBottom="1px solid #eee">
+        <Rating value={r.rating} readOnly size="small" />
+        <Typography fontWeight={600}>{r.name}</Typography>
+        <Typography sx={{ color: muted, mt: 0.5 }}>
+          {r.comment}
+        </Typography>
+        <Typography sx={{ color: '#999', fontSize: 12, mt: 0.5 }}>
+          {r.date}
+        </Typography>
       </Box>
+    ))}
+  </Box>
 
-      {/* Footer */}
-      <Footer />
-
-      {/* Snackbar confirmation */}
-      <Snackbar
-        open={!!popup}
-        autoHideDuration={2000}
-        onClose={() => setPopup('')}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="info" onClose={() => setPopup('')} sx={{ width: '100%' }}>
-          {popup}
-        </Alert>
-      </Snackbar>
+  {/* REVIEW FORM */}
+  {showForm && (
+    <Box mt={4} maxWidth={500} mx="auto">
+      <Rating
+        value={review.rating}
+        onChange={(e, v) => setReview({ ...review, rating: v })}
+      />
+      <textarea
+        rows={3}
+        value={review.comment}
+        onChange={e =>
+          setReview({ ...review, comment: e.target.value })
+        }
+        style={{ width: '100%', marginTop: 10, padding: 8 }}
+      />
+      <Button fullWidth sx={{ mt: 2 }} onClick={submitReview}>
+        Submit Review
+      </Button>
     </Box>
-  );
-};
+  )}
+</Box>
+ </Box> <Footer /> </Box> ); };
 
-export default ProductDetail;
+export default ProductDetails;

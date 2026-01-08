@@ -7,26 +7,30 @@ import {
   Box,
   Button,
   Select,
-  MenuItem,
-  Snackbar,
-  Alert
+  MenuItem
 } from '@mui/material';
-import { useCart } from '../../context/CartContext.jsx';
+import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 
 const WEIGHTS = ['200', '400', '600'];
 
 const ProductCard = ({ product }) => {
   const { addItem, updateQuantity, items } = useCart();
-  const [weight, setWeight] = useState('200');
-  const [popup, setPopup] = useState('');
   const navigate = useNavigate();
 
+  const [weight, setWeight] = useState('200');
+  const [justAdded, setJustAdded] = useState(false);
+
+  // local quantity state so + works even before adding
+  const [localQty, setLocalQty] = useState(1);
+
   const unitPrice = product.prices[weight];
+
   const cartItem = items.find(
-    i => i.productId === product.id && i.weight === weight
+    (i) => i.productId === product.id && i.weight === weight
   );
-  const quantity = cartItem?.quantity || 0;
+
+  const quantity = cartItem?.quantity ?? localQty;
 
   const handleAdd = (e) => {
     e.stopPropagation();
@@ -34,115 +38,93 @@ const ProductCard = ({ product }) => {
       productId: product.id,
       name: product.name,
       weight,
-      unitPrice
+      unitPrice,
+      quantity: localQty
     });
-    setPopup(`${product.name} (${weight}g) added to cart!`);
+
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1500);
   };
 
-  const handleQuantityChange = (e, newQty) => {
+  const handleQtyChange = (e, newQty) => {
     e.stopPropagation();
-    if (newQty >= 0) {
-      updateQuantity(product.id, weight, newQty);
+    if (newQty >= 1) {
+      setLocalQty(newQty);
+      if (cartItem) {
+        updateQuantity(product.id, weight, newQty);
+      }
     }
   };
 
   return (
-    <>
-      <Card
-        sx={{
-          display: 'flex',
-          mb: 2,
-          transition: 'transform 0.3s ease',
-          cursor: 'pointer',
-          '&:hover': { transform: 'scale(1.02)' }
-        }}
-        onClick={() => navigate(`/product/${product.id}`)}
-      >
-        {/* Product Image */}
-        <CardMedia
-          component="img"
-          image={product.image}
-          alt={product.name}
-          sx={{
-            width: 160,
-            height: 160,
-            objectFit: 'cover',
-            borderRadius: 2,
-            margin: 1,
-            transition: 'transform 0.3s ease',
-            '&:hover': { transform: 'scale(1.1)' }
-          }}
-        />
+    <Card
+      sx={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
+      onClick={() => navigate(`/product/${product.id}`)}
+    >
+      {/* IMAGE */}
+      <CardMedia
+        component="img"
+        image={product.image}
+        alt={product.name}
+        sx={{ height: 220, objectFit: 'cover' }}
+      />
 
-        {/* Product Info */}
-        <CardContent sx={{ flex: 1 }}>
-          <Typography variant="h6">{product.name}</Typography>
+      {/* CONTENT */}
+      <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
+        <Typography variant="h6" fontWeight="bold" color="text.secondary">
+          {product.name}
+        </Typography>
 
-          {/* Cart Controls */}
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 1 }}>
-            <Select
-              size="small"
-              value={weight}
-              onChange={e => setWeight(e.target.value)}
-              onClick={e => e.stopPropagation()}
-            >
-              {WEIGHTS.map(w => (
-                <MenuItem key={w} value={w}>
-                  {w}g
-                </MenuItem>
-              ))}
-            </Select>
+        <Typography sx={{ mb: 1 }} color="text.secondary">
+          From ₹ {unitPrice}
+        </Typography>
 
-            <Typography variant="body1">₹ {unitPrice}</Typography>
+        {/* WEIGHT */}
+        <Select
+          fullWidth
+          size="small"
+          sx={{ mb: 2, color: 'text.secondary' }}
+          value={weight}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => setWeight(e.target.value)}
+        >
+          {WEIGHTS.map((w) => (
+            <MenuItem key={w} value={w} sx={{ color: 'text.secondary' }}>
+              {w} g – ₹ {product.prices[w]}
+            </MenuItem>
+          ))}
+        </Select>
 
-            {!quantity ? (
-              <Button variant="contained" onClick={handleAdd} aria-label="Add to Cart">
-                Add to Cart
-              </Button>
-            ) : (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={(e) => handleQuantityChange(e, quantity - 1)}
-                  aria-label="Decrease quantity"
-                >
-                  -
-                </Button>
-                <Typography>{quantity}</Typography>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={(e) => handleQuantityChange(e, quantity + 1)}
-                  aria-label="Increase quantity"
-                >
-                  +
-                </Button>
-              </Box>
-            )}
+        {/* + - AND ADD */}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {/* QUANTITY */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              border: '1px solid #ccc',
+              borderRadius: 1
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button onClick={(e) => handleQtyChange(e, quantity - 1)}>−</Button>
+
+            <Typography sx={{ px: 2 }}>{quantity}</Typography>
+
+            <Button onClick={(e) => handleQtyChange(e, quantity + 1)}>+</Button>
           </Box>
 
-          {/* Total Price */}
-          {quantity > 0 && (
-            <Typography variant="caption" sx={{ display: 'block', mt: 1, fontWeight: 'bold' }}>
-              Total: ₹ {quantity * unitPrice} ({weight}g × {quantity})
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Snackbar confirmation */}
-      <Snackbar
-        open={!!popup}
-        autoHideDuration={2000}
-        onClose={() => setPopup('')}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" onClose={() => setPopup('')} sx={{ width: '100%' }}>
-          {popup}
-        </Alert>
-      </Snackbar>
-    </>
+          {/* ADD BUTTON */}
+          <Button
+            fullWidth
+            variant={justAdded ? 'outlined' : 'contained'}
+            onClick={handleAdd}
+          >
+            {justAdded ? 'ADDED ✓' : 'ADD TO CART'}
+          </Button>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 
