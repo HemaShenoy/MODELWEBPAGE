@@ -68,7 +68,7 @@ const ProductCard = ({ product }) => {
   alt={product.name}
   sx={{
     width: '100%',
-    aspectRatio: '1 / 1',   // makes it square
+    aspectRatio: '1 / 1',   
     objectFit: 'cover'
   }}
 />

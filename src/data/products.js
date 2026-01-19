@@ -2,9 +2,10 @@
 import gulabjamunImg from '../assets/images/gulabjamun.jpg';
 import rasgullaImg from '../assets/images/rasgulla.jpg';
 import kajukatliImg from '../assets/images/kajukatli.jpg';
+import kajurolImg from '../assets/images/kajurol.jpg';
 
 import masalchipsImg from '../assets/images/masalchips.jpg';
-import samosaImg from '../assets/images/samosa.jpg';
+
 import pakoraImg from '../assets/images/pakora.jpg';
 
 import mangolassiImg from '../assets/images/mangolassi.jpg';
@@ -94,7 +95,7 @@ export const PRODUCTS = [
     id: 'sw6',
     category: 'sweets',
     name: 'Kaju Rolls',
-    image: kajukatliImg, // replace with kajuRollsImg if available
+    image: kajurolImg, 
     prices: { '200': 160, '400': 300, '600': 450 },
     ingredients: 'Cashews, Sugar, Ghee',
     uses: 'Luxurious sweet for Diwali, Holi, weddings, and celebrations',
@@ -119,20 +120,7 @@ export const PRODUCTS = [
     shelfLife: '10 Days',
     shipping: 'India only'
   },
-  {
-    id: 'sn2',
-    category: 'snacks',
-    name: 'Samosa',
-    image: samosaImg,
-    prices: { '200': 60, '400': 110, '600': 160 },
-    ingredients: 'Potatoes, peas, spices, flour',
-    uses: 'Popular street snack',
-    expiry: 'Best before 1 day',
-    details: 'Crispy fried pastry stuffed with spiced potato and peas. Iconic Indian street food.',
-    shelfLife: '1 Day',
-    piecesPerKg: '12 Approx',
-    shipping: 'Not available'
-  },
+
   {
     id: 'sn3',
     category: 'snacks',
