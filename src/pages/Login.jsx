@@ -18,6 +18,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import Topbar from '../components/TopBar/Topbar.jsx';
+import Footer from '../components/Footer/Footer.jsx';
 
 const Login = () => {
   const { login, guestLogin } = useAuth();
@@ -60,17 +62,19 @@ const handleGuestLogin = () => {
 
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        p: 2,
-        background: 'linear-gradient(135deg, #70abde 0%, #70abde 100%)',
-        position: 'relative'
-      }}
-    >
+    <>
+      <Topbar />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          p: 2,
+          background: '#ffffff',
+          position: 'relative'
+        }}
+      >
       {/* Decorative elements */}
       <Box
         sx={{
@@ -330,7 +334,9 @@ const handleGuestLogin = () => {
           {popup}
         </Alert>
       </Snackbar>
-    </Box>
+      </Box>
+      <Footer />
+    </>
   );
 };
 

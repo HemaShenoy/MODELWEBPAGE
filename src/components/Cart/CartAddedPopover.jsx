@@ -6,7 +6,8 @@ import {
   Avatar,
   Divider,
   Card,
-  Slide
+  Slide,
+  Portal
 } from '@mui/material';
 import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +33,7 @@ export const useCartPopover = () => {
 
   const hidePopover = () => {
     setOpen(false);
+    setLastAddedItem(null);
   };
 
   return { open, setOpen, showPopover, hidePopover, lastAddedItem };
@@ -56,22 +58,23 @@ const CartAddedPopover = ({ open, onClose, lastAddedItem }) => {
   };
 
   return (
-    <Slide direction="down" in={open} mountOnEnter unmountOnExit timeout={300}>
-      <Box
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1300,
-          display: 'flex',
-          justifyContent: 'center',
-          p: 2,
-          pt: 3,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 100%)',
-          backdropFilter: 'blur(4px)'
-        }}
-      >
+    <Portal>
+      <Slide direction="down" in={open} mountOnEnter unmountOnExit timeout={300}>
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1400,
+            display: 'flex',
+            justifyContent: 'center',
+            p: 2,
+            pt: 3,
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 100%)',
+            backdropFilter: 'blur(4px)'
+          }}
+        >
         <Card
           sx={{
             p: 3,
@@ -242,6 +245,7 @@ const CartAddedPopover = ({ open, onClose, lastAddedItem }) => {
         </Card>
       </Box>
     </Slide>
+  </Portal>
   );
 };
 
