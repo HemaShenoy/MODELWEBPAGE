@@ -37,7 +37,9 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/:id" element={<Dashboard />} /> {/* ✅ category inside dashboard */}
+              <Route path="/dashboard/:id" element={<Dashboard />} /> 
+              
+              
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/info/:section" element={<InfoPage />} />
               <Route path="/search/:term" element={<SearchResults />} /> {/* ✅ global search */}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -7,14 +7,20 @@ import {
   Grid,
   Rating,
   LinearProgress,
-  Chip
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 
 import { PRODUCTS } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { storage } from '../services/storage';
 import Topbar from '../components/TopBar/Topbar';
 import Footer from '../components/Footer/Footer';
+import CartAddedPopover, { useCartPopover } from '../components/Cart/CartAddedPopover';
 
 const WEIGHTS = ['200', '400', '600'];
 const IMAGE_SIZE = 380;
@@ -23,15 +29,20 @@ const muted = '#6b7280';
 const ProductDetails = () => {
   const { id } = useParams();
   const product = PRODUCTS.find(p => p.id === id);
+  const navigate = useNavigate();
 
   const { addItem, updateQuantity, items } = useCart();
   const { user } = useAuth();
+  const { open, showPopover, hidePopover, lastAddedItem } = useCartPopover();
 
   const [imageIndex, setImageIndex] = useState(0);
   const [weight, setWeight] = useState('200');
+  const [localQuantity, setLocalQuantity] = useState(1);
   const [reviews, setReviews] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [review, setReview] = useState({ rating: null, comment: '' });
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [notPurchasedDialogOpen, setNotPurchasedDialogOpen] = useState(false);
 
   /* 🔴 HOOKS MUST RUN BEFORE ANY RETURN */
   useEffect(() => {
@@ -45,15 +56,19 @@ const ProductDetails = () => {
     localStorage.setItem(`reviews_${product.id}`, JSON.stringify(reviews));
   }, [reviews, product]);
 
+  // Check if user has purchased this product
+  const hasPurchasedProduct = () => {
+    if (!user) return false;
+    const orders = storage.get(`orders_${user.email}`, []) || [];
+    return orders.some(order => 
+      order.items && order.items.some(item => item.productId === product.id) && order.paymentStatus === 'success'
+    );
+  };
+
   if (!product) return null;
 
   const images = [product.image, product.image];
   const unitPrice = product.prices[weight];
-
-  const cartItem = items.find(
-    i => i.productId === product.id && i.weight === weight
-  );
-  const quantity = cartItem?.quantity || 0;
 
   const avgRating =
     reviews.length > 0
@@ -76,6 +91,21 @@ const ProductDetails = () => {
 
     setReview({ rating: null, comment: '' });
     setShowForm(false);
+  };
+
+  // Handle write review button click with validations
+  const handleWriteReviewClick = () => {
+    if (!user) {
+      setLoginDialogOpen(true);
+      return;
+    }
+    
+    if (!hasPurchasedProduct()) {
+      setNotPurchasedDialogOpen(true);
+      return;
+    }
+    
+    setShowForm(true);
   };
 
   return (
@@ -192,49 +222,91 @@ const ProductDetails = () => {
 
             {/* CART */}
             <Box mt={4}>
-              {!quantity ? (
-                <Button
-                  fullWidth
-                  sx={{ py: 1.4, background: '#2196F3', color: '#fff' }}
-                  onClick={() =>
-                    addItem({
-                      productId: product.id,
-                      name: product.name,
-                      weight,
-                      unitPrice
-                    })
-                  }
-                >
-                  ADD TO CART
-                </Button>
-              ) : (
-                <Box display="flex" gap={2} alignItems="center">
+              <Box display="flex" gap={2} alignItems="center">
+                {/* +/- BUTTONS */}
+                <Box display="flex" gap={1} alignItems="center">
                   <Button
                     variant="outlined"
-                    onClick={() =>
-                      quantity > 1 &&
-                      updateQuantity(product.id, weight, quantity - 1)
-                    }
+                    size="small"
+                    onClick={() => {
+                      if (localQuantity > 1) {
+                        setLocalQuantity(localQuantity - 1);
+                      } else {
+                        setLocalQuantity(1);
+                      }
+                    }}
                   >
-                    -
+                    −
                   </Button>
-                  <Typography>{quantity}</Typography>
+                  <Typography sx={{ minWidth: 30, textAlign: 'center', fontWeight: 'bold' }}>
+                    {localQuantity}
+                  </Typography>
                   <Button
                     variant="outlined"
-                    onClick={() =>
-                      updateQuantity(product.id, weight, quantity + 1)
-                    }
+                    size="small"
+                    onClick={() => {
+                      setLocalQuantity(localQuantity + 1);
+                    }}
                   >
                     +
                   </Button>
                 </Box>
-              )}
+
+                {/* ADD TO CART BUTTON */}
+                <Button
+                  fullWidth
+                  sx={{
+                    py: 1.4,
+                    background: '#2196F3',
+                    color: '#fff',
+                    flexGrow: 1
+                  }}
+                  onClick={(e) => {
+                    const cartItem = items.find(
+                      (i) => i.productId === product.id && i.weight === weight
+                    );
+
+                    let popItem = null;
+
+                    if (cartItem) {
+                      // Item already in cart, update quantity
+                      const newQty = cartItem.quantity + localQuantity;
+                      updateQuantity(product.id, weight, newQty);
+                      popItem = {
+                        ...cartItem,
+                        quantity: localQuantity,
+                        totalPrice: localQuantity * unitPrice,
+                        name: product.name,
+                        image: product.image,
+                        weight
+                      };
+                    } else {
+                      // New item, add with selected quantity
+                      const newItem = {
+                        productId: product.id,
+                        name: product.name,
+                        weight,
+                        unitPrice,
+                        quantity: localQuantity,
+                        image: product.image,
+                        totalPrice: localQuantity * unitPrice
+                      };
+                      addItem(newItem);
+                      popItem = newItem;
+                    }
+                    setLocalQuantity(1);
+                    showPopover(e, popItem);
+                  }}
+                >
+                  ADD TO CART
+                </Button>
+              </Box>
             </Box>
 
-            {quantity > 0 && (
+            {localQuantity > 0 && (
               <Chip
                 sx={{ mt: 2 }}
-                label={`Total ₹${quantity * unitPrice}`}
+                label={`Total ₹${localQuantity * unitPrice}`}
               />
             )}
 
@@ -308,7 +380,7 @@ const ProductDetails = () => {
       </Grid>
 
       <Grid item xs={12} md={4}>
-        <Button variant="contained" onClick={() => setShowForm(true)}>
+        <Button variant="contained" onClick={handleWriteReviewClick}>
           Write a review
         </Button>
       </Grid>
@@ -352,6 +424,58 @@ const ProductDetails = () => {
     </Box>
   )}
 </Box>
- </Box> <Footer /> </Box> ); };
+
+  {/* LOGIN DIALOG */}
+  <Dialog open={loginDialogOpen} onClose={() => setLoginDialogOpen(false)}>
+    <DialogTitle>Please Login</DialogTitle>
+    <DialogContent>
+      <Typography sx={{ mt: 2 }}>
+        You need to login to write a review. Please login with your account.
+      </Typography>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={() => setLoginDialogOpen(false)}>Cancel</Button>
+      <Button
+        variant="contained"
+        onClick={() => {
+          setLoginDialogOpen(false);
+          navigate('/login');
+        }}
+      >
+        Go to Login
+      </Button>
+    </DialogActions>
+  </Dialog>
+
+  {/* NOT PURCHASED DIALOG */}
+  <Dialog open={notPurchasedDialogOpen} onClose={() => setNotPurchasedDialogOpen(false)}>
+    <DialogTitle>Purchase Required</DialogTitle>
+    <DialogContent>
+      <Typography sx={{ mt: 2 }}>
+        You can only review products you have purchased. Please buy this product first to leave a review.
+      </Typography>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={() => setNotPurchasedDialogOpen(false)}>Close</Button>
+      <Button
+        variant="contained"
+        onClick={() => {
+          setNotPurchasedDialogOpen(false);
+          navigate('/orders');
+        }}
+      >
+        View My Orders
+      </Button>
+    </DialogActions>
+  </Dialog>
+
+  {/* Cart Added Popover */}
+  <CartAddedPopover open={open} onClose={hidePopover} lastAddedItem={lastAddedItem} />
+</Box>
+
+      <Footer />
+    </Box>
+  );
+};
 
 export default ProductDetails;

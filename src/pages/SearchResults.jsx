@@ -24,14 +24,16 @@ const SearchResults = () => {
       <Topbar />
 
       {/* Body */}
-      <Box sx={{ flex: 1, p: 2 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          Search results for "{term}"
+      <Box sx={{ flex: 1, p: 4, bgcolor: '#fff' }}>
+        <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+          Search results for "<span style={{ color: '#2196F3' }}>{term}</span>"
         </Typography>
 
         {results.length === 0 ? (
-          <Box>
-            <Typography>No products found.</Typography>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" sx={{ mb: 3, color: '#666' }}>
+              No products found.
+            </Typography>
             <Button
               variant="contained"
               sx={{ mt: 2 }}
@@ -41,9 +43,9 @@ const SearchResults = () => {
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={2}>
+          <Grid container spacing={4}>
             {results.map((p) => (
-              <Grid item xs={12} sm={6} md={3} key={p.id}>
+              <Grid item xs={12} sm={6} md={6} lg={4} key={p.id}>
                 <ProductCard product={p} />
               </Grid>
             ))}

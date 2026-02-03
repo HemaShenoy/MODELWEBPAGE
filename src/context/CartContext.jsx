@@ -46,7 +46,9 @@ export const CartProvider = ({ children }) => {
 
   const key = (productId, weight) => `${productId}_${weight}`;
 
-  const addItem = useCallback(({ productId, name, weight, unitPrice }) => {
+  // ✅ Modified addItem to accept quantity
+  const addItem = useCallback(
+  ({ productId, name, weight, unitPrice, quantity = 1, image }) => {
     const k = key(productId, weight);
     setItems(prev => {
       const existing = prev.find(i => i.key === k);
@@ -55,8 +57,8 @@ export const CartProvider = ({ children }) => {
           i.key === k
             ? {
                 ...i,
-                quantity: i.quantity + 1,
-                totalPrice: (i.quantity + 1) * i.unitPrice
+                quantity: i.quantity + quantity,
+                totalPrice: (i.quantity + quantity) * i.unitPrice
               }
             : i
         );
@@ -66,14 +68,18 @@ export const CartProvider = ({ children }) => {
         productId,
         name,
         weight,
-        quantity: 1,
+        quantity,
         unitPrice,
-        totalPrice: unitPrice
+        totalPrice: quantity * unitPrice,
+        image // ✅ now valid
       };
       return [...prev, newItem];
     });
     return { ok: true };
-  }, []);
+  },
+  []
+);
+
 
   const updateQuantity = useCallback((productId, weight, quantity) => {
     const k = key(productId, weight);

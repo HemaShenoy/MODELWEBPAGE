@@ -122,7 +122,7 @@ export const PRODUCTS = [
   },
 
   {
-    id: 'sn3',
+    id: 'sn2',
     category: 'snacks',
     name: 'Pakora',
     image: pakoraImg,
@@ -135,7 +135,7 @@ export const PRODUCTS = [
     shipping: 'Not available'
   },
   {
-    id: 'sn4',
+    id: 'sn3',
     category: 'snacks',
     name: 'Kachori',
     image: kachoriImg,
@@ -148,7 +148,7 @@ export const PRODUCTS = [
     shipping: 'Not available'
   },
   {
-    id: 'sn5',
+    id: 'sn4',
     category: 'snacks',
     name: 'Dhokla',
     image: dhoklaImg,

@@ -98,19 +98,21 @@ const ProfilePage = () => {
 
       {/* Main content fills width */}
       <Box sx={{ flex: 1, p: 3 }}>
-        <Typography variant="h4" sx={{ mb: 2 }}>
+        <Typography variant="h4" sx={{ mb: 2, textAlign: 'center', fontWeight: 'bold' }}>
           MY ACCOUNT
         </Typography>
 
         {/* Profile Details */}
-        <Paper sx={{ p: 2, mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontFamily: 'monospace' }}>
-            Profile Details
+        <Paper sx={{ p: 2, mb: 2}}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+            {user.name || user.email.split('@')[0]}
           </Typography>
-          <Divider sx={{ my: 1 }} />
-          <Typography>Name: {user.name || user.email.split('@')[0]}</Typography>
-          <Typography>Email: {user.email}</Typography>
-          <Typography>Location: {user.location || 'India'}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {user.email}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {user.location || 'India'}
+          </Typography>
         </Paper>
 
         {/* Saved Addresses */}
@@ -182,12 +184,7 @@ const ProfilePage = () => {
                   />
                 )}
 
-                <Divider sx={{ my: 1 }} />
-                <Typography variant="subtitle2">Billing Details</Typography>
-                <Typography>Name: {order.billing?.name}</Typography>
-                <Typography>Email: {order.billing?.email}</Typography>
-                <Typography>Phone: {order.billing?.phone}</Typography>
-                <Typography>Address: {order.billing?.address}</Typography>
+
 
                 <Typography variant="subtitle2" sx={{ mt: 2 }}>
                   Items Ordered

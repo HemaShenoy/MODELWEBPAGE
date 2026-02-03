@@ -11,12 +11,14 @@ import {
 } from '@mui/material';
 import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import CartAddedPopover, { useCartPopover } from '../Cart/CartAddedPopover';
 
 const WEIGHTS = ['200', '400', '600'];
 
 const ProductCard = ({ product }) => {
-  const { addItem, updateQuantity, items } = useCart();
+  const { addItem, items } = useCart();
   const navigate = useNavigate();
+  const { open, showPopover, hidePopover, lastAddedItem } = useCartPopover();
 
   const [weight, setWeight] = useState('200');
   const [justAdded, setJustAdded] = useState(false);
@@ -30,57 +32,73 @@ const ProductCard = ({ product }) => {
     (i) => i.productId === product.id && i.weight === weight
   );
 
-  const quantity = cartItem?.quantity ?? localQty;
-
   const handleAdd = (e) => {
     e.stopPropagation();
-    addItem({
+    
+    const newItem = {
       productId: product.id,
       name: product.name,
       weight,
       unitPrice,
-      quantity: localQty
-    });
+      quantity: localQty,
+      image: product.images?.[0] || product.image,
+      totalPrice: localQty * unitPrice
+    };
+    
+    addItem(newItem);
 
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
+
+    // Show popover
+    showPopover(e, newItem);
   };
 
   const handleQtyChange = (e, newQty) => {
     e.stopPropagation();
     if (newQty >= 1) {
       setLocalQty(newQty);
-      if (cartItem) {
-        updateQuantity(product.id, weight, newQty);
-      }
+    } else {
+      setLocalQty(1);
     }
   };
 
   return (
-    <Card
-      sx={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
+    <>
+      <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        cursor: 'pointer',
+        transition: 'transform 0.3s, box-shadow 0.3s',
+        '&:hover': {
+          transform: 'translateY(-8px)',
+          boxShadow: '0 12px 24px rgba(0,0,0,0.15)'
+        }
+      }}
       onClick={() => navigate(`/product/${product.id}`)}
     >
       {/* IMAGE */}
-<CardMedia
-  component="img"
-  image={product.image}
-  alt={product.name}
-  sx={{
-    width: '100%',
-    aspectRatio: '1 / 1',   
-    objectFit: 'cover'
-  }}
-/>
+      <CardMedia
+        component="img"
+        image={product.image}
+        alt={product.name}
+        sx={{
+          width: '100%',
+          aspectRatio: '1 / 1',
+          objectFit: 'cover',
+          flexGrow: 1
+        }}
+      />
 
-
-      {/* CONTENT */}
-      <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-        <Typography variant="h6" fontWeight="bold" color="text.secondary">
+      {/* CONTENT - AT BOTTOM */}
+      <CardContent sx={{ textAlign: 'center', bgcolor: '#f9f9f9', p: 2.5 }}>
+        <Typography variant="h6" fontWeight="bold" color="text.primary" sx={{ mb: 1, fontSize: '1.1rem' }}>
           {product.name}
         </Typography>
 
-        <Typography sx={{ mb: 1 }} color="text.secondary">
+        <Typography sx={{ mb: 2, fontWeight: 600, color: '#2196F3', fontSize: '1.05rem' }} >
           From ₹ {unitPrice}
         </Typography>
 
@@ -112,11 +130,11 @@ const ProductCard = ({ product }) => {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <Button onClick={(e) => handleQtyChange(e, quantity - 1)}>−</Button>
+            <Button onClick={(e) => handleQtyChange(e, localQty - 1)}>−</Button>
 
-            <Typography sx={{ px: 2 }}>{quantity}</Typography>
+            <Typography sx={{ px: 2 }}>{localQty}</Typography>
 
-            <Button onClick={(e) => handleQtyChange(e, quantity + 1)}>+</Button>
+            <Button onClick={(e) => handleQtyChange(e, localQty + 1)}>+</Button>
           </Box>
 
           {/* ADD BUTTON */}
@@ -130,6 +148,10 @@ const ProductCard = ({ product }) => {
         </Box>
       </CardContent>
     </Card>
+
+    {/* Cart Added Popover */}
+    <CartAddedPopover open={open} onClose={hidePopover} lastAddedItem={lastAddedItem} />
+  </>
   );
 };
 

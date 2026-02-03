@@ -45,14 +45,16 @@ const Topbar = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleSearch = () => {
-    if (search.trim()) {
-      navigate(`/search/${encodeURIComponent(search.trim())}`);
-      setSearch('');
-      setSuggestions([]);
-      setSearchOpen(false);
-    }
-  };
+const handleSearch = () => {
+  if (search.trim()) {
+    setSearchOpen(false);
+    setSuggestions([]);
+    navigate(`/search/${encodeURIComponent(search.trim())}`);
+    setSearch('');
+  }
+};
+
+
 
   const handleCategorySelect = (catId) => {
     navigate(`/dashboard/${catId}`);
@@ -119,10 +121,10 @@ const Topbar = () => {
           {/* Login/Profile */}
 {user ? (
   <>
-    <IconButton onClick={handleMenuOpen}>
-      <Avatar sx={{ bgcolor: 'secondary.main' }}>
-        {user.email.charAt(0).toUpperCase()}
-      </Avatar>
+    <IconButton onClick={handleMenuOpen} aria-label="profile" sx={{ color: '#000' }}>
+      <Typography sx={{ fontWeight: 700, mr: 1 }}>
+        {user.name || user.email.split('@')[0]}
+      </Typography>
     </IconButton>
     <Menu
       anchorEl={anchorEl}
@@ -164,36 +166,83 @@ const Topbar = () => {
         </Box>
       </Toolbar>
 
-      {/* Search Bar */}
+      {/* Search Bar with Black Background Overlay */}
       {searchOpen && (
-        <Box sx={{ p: 2, bgcolor: '#f5f5f5' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#fff', px: 1, borderRadius: 1 }}>
-            <InputBase
-              placeholder="Search…"
-              value={search}
-              onChange={handleChange}
-              sx={{ flex: 1, ml: 1 }}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <IconButton onClick={handleSearch} sx={{ color: '#000' }}>
-              <SearchIcon />
-            </IconButton>
-          </Box>
+        <>
+          {/* Black Overlay */}
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              bgcolor: 'rgba(0, 0, 0, 0.9)',
+              zIndex: 999,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              pt: 8
+            }}
+            onClick={() => {
+              setSearchOpen(false);
+              setSuggestions([]);
+            }}
+          >
+            {/* Search Box Container */}
+            <Box
+              sx={{
+                width: '90%',
+                maxWidth: 600,
+                zIndex: 1000
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Search Input */}
+              <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#fff', px: 2, borderRadius: 2, mb: 2 }}>
+                <InputBase
+                  placeholder="Search products…"
+                  value={search}
+                  onChange={handleChange}
+                  sx={{ flex: 1, ml: 1, fontSize: '1.1rem' }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  autoFocus
+                />
+                <IconButton onClick={handleSearch} sx={{ color: '#000' }}>
+                  <SearchIcon />
+                </IconButton>
+              </Box>
 
-          {suggestions.length > 0 && (
-            <Paper sx={{ mt: 1 }}>
-              <List>
-                {suggestions.map((s) => (
-                  <ListItem key={s.id} disablePadding>
-                    <ListItemButton onClick={() => handleSuggestionClick(s.name)}>
-                      <ListItemText primary={s.name} secondary={s.category} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          )}
-        </Box>
+              {/* Suggestions */}
+              {suggestions.length > 0 && (
+                <Paper sx={{ maxHeight: 400, overflow: 'auto' }}>
+                  <List>
+                    {suggestions.map((s) => (
+                      <ListItem key={s.id} disablePadding>
+                        <ListItemButton onClick={() => handleSuggestionClick(s.name)}>
+                          <Box sx={{ mr: 2, width: 50, height: 50, borderRadius: 1, overflow: 'hidden' }}>
+                            <img
+                              src={s.image}
+                              alt={s.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </Box>
+                          <Box sx={{ flex: 1 }}>
+                            <ListItemText
+                              primary={s.name}
+                              secondary={`${s.category} • From ₹${Object.values(s.prices)[0]}`}
+                            />
+                          </Box>
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Paper>
+              )}
+            </Box>
+          </Box>
+        </>
       )}
     </AppBar>
   );
